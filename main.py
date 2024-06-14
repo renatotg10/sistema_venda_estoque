@@ -31,12 +31,15 @@ class SistemaEstoqueVendas(tk.Tk):
         if selected_tab == "Registro de Vendas":
             self.tab_vendas.atualizar_combo_produto()
             self.tab_estoque.limpa_campos()
+            self.tab_estoque.carregar_produtos()
 
         if selected_tab == "Gerenciamento de Estoque":
             self.tab_estoque.limpa_campos()
+            self.tab_estoque.carregar_produtos()
 
         if selected_tab == "Relatórios":
             self.tab_estoque.limpa_campos()
+            self.tab_estoque.carregar_produtos()
 
 
 if __name__ == "__main__":

@@ -47,6 +47,13 @@ class GerenciamentoEstoque(tk.Frame):
         self.button_excluir = tk.Button(self.frame_botoes, text="Excluir Produto", command=self.excluir_produto)
         self.button_excluir.grid(row=0, column=3, padx=5, pady=5, sticky="ew")
 
+        self.button_excluidos = tk.Button(self.frame_botoes, text="Produtos Excluídos", command=self.listar_produtos_excluidos)
+        self.button_excluidos.grid(row=0, column=4, padx=5, pady=5, sticky="ew")
+
+        self.button_restaurar = tk.Button(self.frame_botoes, text="Restaurar Produto", command=self.restaurar_produto)
+        self.button_restaurar.grid(row=0, column=5, padx=5, pady=5, sticky="ew")
+        self.button_restaurar["state"] = "disabled"
+
         # Configurar a coluna 1 do frame_produto para se redimensionar ao redor dos botões
         self.frame_produto.grid_columnconfigure(1, weight=1)
 
@@ -153,3 +160,39 @@ class GerenciamentoEstoque(tk.Frame):
 
         for produto in produtos:
             self.tree_produtos.insert("", "end", values=produto)
+
+    def listar_produtos_excluidos(self):
+        for i in self.tree_produtos.get_children():
+            self.tree_produtos.delete(i)
+
+        conexao = sqlite3.connect('estoque_vendas.db')
+        cursor = conexao.cursor()
+        cursor.execute('SELECT * FROM produtos WHERE ativo = 0')
+        produtos = cursor.fetchall()
+        conexao.close()
+
+        for produto in produtos:
+            self.tree_produtos.insert("", "end", values=produto)
+
+        self.button_restaurar["state"] = "normal"
+
+    def restaurar_produto(self):
+        selected_item = self.tree_produtos.selection()
+        if not selected_item:
+            messagebox.showerror("Erro", "Selecione um produto para restaurar!")
+            return
+
+        item = self.tree_produtos.item(selected_item)
+        produto_id = item['values'][0]
+
+        resposta = messagebox.askyesno("Confirmar Restauração", "Tem certeza que deseja restaurar este produto?")
+        if resposta:
+            conexao = sqlite3.connect('estoque_vendas.db')
+            cursor = conexao.cursor()
+            cursor.execute("UPDATE produtos SET ativo = 1 WHERE id = ?", (produto_id,))
+            conexao.commit()
+            conexao.close()
+
+            self.carregar_produtos()
+            self.button_restaurar["state"] = "disabled"
+            messagebox.showinfo("Sucesso", "Produto resturado com sucesso!")
