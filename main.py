@@ -23,6 +23,14 @@ class SistemaEstoqueVendas(tk.Tk):
         self.tabs.add(self.tab_vendas, text="Registro de Vendas")
         self.tabs.add(self.tab_relatorios, text="Relatórios")
 
+        # Vincular o evento de troca de aba
+        self.tabs.bind("<<NotebookTabChanged>>", self.on_tab_changed)
+
+    def on_tab_changed(self, event):
+        selected_tab = event.widget.tab('current')['text']
+        if selected_tab == "Registro de Vendas":
+            self.tab_vendas.atualizar_combo_produto()
+
 if __name__ == "__main__":
     criar_banco_de_dados()
     app = SistemaEstoqueVendas()

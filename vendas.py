@@ -36,7 +36,6 @@ class RegistroVendas(tk.Frame):
         self.tree_vendas.heading("Data", text="Data")
         self.tree_vendas.pack(pady=10)
 
-        self.carregar_produtos_venda()
         self.carregar_vendas()
 
     def carregar_produtos_venda(self):
@@ -50,7 +49,16 @@ class RegistroVendas(tk.Frame):
 
     def registrar_venda(self):
         produto_selecionado = self.combo_produto.get()
-        quantidade = int(self.entry_quantidade_venda.get())
+        if not produto_selecionado:
+            messagebox.showerror("Erro", "Selecione um produto!")
+            return
+
+        quantidade = self.entry_quantidade_venda.get()
+        if not quantidade.isdigit():
+            messagebox.showerror("Erro", "Digite uma quantidade válida!")
+            return
+
+        quantidade = int(quantidade)
         produto_id = int(produto_selecionado.split(" - ")[0])
 
         conexao = sqlite3.connect('estoque_vendas.db')
@@ -90,3 +98,6 @@ class RegistroVendas(tk.Frame):
 
         for venda in vendas:
             self.tree_vendas.insert("", "end", values=venda)
+
+    def atualizar_combo_produto(self):
+        self.carregar_produtos_venda()
