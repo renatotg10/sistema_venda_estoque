@@ -13,7 +13,14 @@ class GerenciamentoEstoque(tk.Frame):
         self.label_titulo = tk.Label(self, text="Gerenciamento de Estoque")
         self.label_titulo.pack(pady=10)
 
-        self.frame_produto = tk.Frame(self)
+        self.frame_principal = tk.Frame(self)
+        self.frame_principal.pack(pady=10)
+
+        # Frame lateral para botões e entradas
+        self.frame_lateral = tk.Frame(self.frame_principal)
+        self.frame_lateral.pack(side=tk.LEFT, padx=10)
+
+        self.frame_produto = tk.Frame(self.frame_lateral)
         self.frame_produto.pack(pady=10)
 
         self.label_nome = tk.Label(self.frame_produto, text="Nome:")
@@ -31,20 +38,24 @@ class GerenciamentoEstoque(tk.Frame):
         self.entry_quantidade = tk.Entry(self.frame_produto)
         self.entry_quantidade.grid(row=2, column=1)
 
-        self.button_adicionar = tk.Button(self.frame_produto, text="Adicionar Produto", command=self.adicionar_produto)
-        self.button_adicionar.grid(row=3, columnspan=2, pady=5)
+        self.button_adicionar = tk.Button(self.frame_lateral, text="Adicionar Produto", command=self.adicionar_produto)
+        self.button_adicionar.pack(pady=5)
 
-        self.button_editar = tk.Button(self.frame_produto, text="Editar Produto", command=self.editar_produto)
-        self.button_editar.grid(row=4, columnspan=2, pady=5)
+        self.button_editar = tk.Button(self.frame_lateral, text="Editar Produto", command=self.editar_produto)
+        self.button_editar.pack(pady=5)
 
-        self.button_salvar = tk.Button(self.frame_produto, text="Salvar Alterações", command=self.salvar_alteracoes)
-        self.button_salvar.grid(row=5, columnspan=2, pady=5)
+        self.button_salvar = tk.Button(self.frame_lateral, text="Salvar Alterações", command=self.salvar_alteracoes)
+        self.button_salvar.pack(pady=5)
         self.button_salvar["state"] = "disabled"
 
-        self.button_excluir = tk.Button(self.frame_produto, text="Excluir Produto", command=self.excluir_produto)
-        self.button_excluir.grid(row=6, columnspan=2, pady=5)
+        self.button_excluir = tk.Button(self.frame_lateral, text="Excluir Produto", command=self.excluir_produto)
+        self.button_excluir.pack(pady=5)
 
-        self.tree_produtos = ttk.Treeview(self, columns=("ID", "Nome", "Preço", "Quantidade"), show="headings")
+        # Frame para a lista de produtos
+        self.frame_lista = tk.Frame(self.frame_principal)
+        self.frame_lista.pack(side=tk.LEFT, padx=10)
+
+        self.tree_produtos = ttk.Treeview(self.frame_lista, columns=("ID", "Nome", "Preço", "Quantidade"), show="headings")
         self.tree_produtos.heading("ID", text="ID")
         self.tree_produtos.heading("Nome", text="Nome")
         self.tree_produtos.heading("Preço", text="Preço")
