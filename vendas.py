@@ -41,7 +41,7 @@ class RegistroVendas(tk.Frame):
     def carregar_produtos_venda(self):
         conexao = sqlite3.connect('estoque_vendas.db')
         cursor = conexao.cursor()
-        cursor.execute('SELECT id, nome FROM produtos')
+        cursor.execute('SELECT id, nome FROM produtos WHERE ativo = 1')
         produtos = cursor.fetchall()
         conexao.close()
 

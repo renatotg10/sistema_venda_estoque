@@ -33,6 +33,9 @@ class GerenciamentoEstoque(tk.Frame):
         self.button_adicionar = tk.Button(self.frame_produto, text="Adicionar Produto", command=self.adicionar_produto)
         self.button_adicionar.grid(row=3, columnspan=2, pady=5)
 
+        self.button_excluir = tk.Button(self.frame_produto, text="Excluir Produto", command=self.excluir_produto)
+        self.button_excluir.grid(row=4, columnspan=2, pady=5)
+
         self.tree_produtos = ttk.Treeview(self, columns=("ID", "Nome", "Preço", "Quantidade"), show="headings")
         self.tree_produtos.heading("ID", text="ID")
         self.tree_produtos.heading("Nome", text="Nome")
@@ -49,12 +52,32 @@ class GerenciamentoEstoque(tk.Frame):
 
         conexao = sqlite3.connect('estoque_vendas.db')
         cursor = conexao.cursor()
-        cursor.execute('INSERT INTO produtos (nome, preco, quantidade) VALUES (?, ?, ?)', (nome, preco, quantidade))
+        cursor.execute('INSERT INTO produtos (nome, preco, quantidade, ativo) VALUES (?, ?, ?, 1)', (nome, preco, quantidade))
         conexao.commit()
         conexao.close()
 
         self.carregar_produtos()
         messagebox.showinfo("Sucesso", "Produto adicionado com sucesso!")
+
+    def excluir_produto(self):
+        selected_item = self.tree_produtos.selection()
+        if not selected_item:
+            messagebox.showerror("Erro", "Selecione um produto para excluir!")
+            return
+
+        item = self.tree_produtos.item(selected_item)
+        produto_id = item['values'][0]
+
+        resposta = messagebox.askyesno("Confirmar Exclusão", "Tem certeza que deseja excluir este produto?")
+        if resposta:
+            conexao = sqlite3.connect('estoque_vendas.db')
+            cursor = conexao.cursor()
+            cursor.execute("UPDATE produtos SET ativo = 0 WHERE id = ?", (produto_id,))
+            conexao.commit()
+            conexao.close()
+
+            self.carregar_produtos()
+            messagebox.showinfo("Sucesso", "Produto excluído com sucesso!")
 
     def carregar_produtos(self):
         for i in self.tree_produtos.get_children():
@@ -62,7 +85,7 @@ class GerenciamentoEstoque(tk.Frame):
 
         conexao = sqlite3.connect('estoque_vendas.db')
         cursor = conexao.cursor()
-        cursor.execute('SELECT * FROM produtos')
+        cursor.execute('SELECT * FROM produtos WHERE ativo = 1')
         produtos = cursor.fetchall()
         conexao.close()
 
