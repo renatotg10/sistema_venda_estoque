@@ -30,6 +30,14 @@ class SistemaEstoqueVendas(tk.Tk):
         selected_tab = event.widget.tab('current')['text']
         if selected_tab == "Registro de Vendas":
             self.tab_vendas.atualizar_combo_produto()
+            self.tab_estoque.limpa_campos()
+
+        if selected_tab == "Gerenciamento de Estoque":
+            self.tab_estoque.limpa_campos()
+
+        if selected_tab == "Relatórios":
+            self.tab_estoque.limpa_campos()
+
 
 if __name__ == "__main__":
     criar_banco_de_dados()

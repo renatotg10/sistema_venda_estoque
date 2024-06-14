@@ -23,7 +23,7 @@ class GeracaoRelatorios(tk.Frame):
     def gerar_relatorio_estoque(self):
         conexao = sqlite3.connect('estoque_vendas.db')
         cursor = conexao.cursor()
-        cursor.execute('SELECT * FROM produtos')
+        cursor.execute('SELECT * FROM produtos WHERE produtos.ativo = 1')
         produtos = cursor.fetchall()
         conexao.close()
 

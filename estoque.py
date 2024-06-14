@@ -13,49 +13,44 @@ class GerenciamentoEstoque(tk.Frame):
         self.label_titulo = tk.Label(self, text="Gerenciamento de Estoque")
         self.label_titulo.pack(pady=10)
 
-        self.frame_principal = tk.Frame(self)
-        self.frame_principal.pack(pady=10)
-
-        # Frame lateral para botões e entradas
-        self.frame_lateral = tk.Frame(self.frame_principal)
-        self.frame_lateral.pack(side=tk.LEFT, padx=10)
-
-        self.frame_produto = tk.Frame(self.frame_lateral)
+        self.frame_produto = tk.Frame(self)
         self.frame_produto.pack(pady=10)
 
         self.label_nome = tk.Label(self.frame_produto, text="Nome:")
-        self.label_nome.grid(row=0, column=0)
-        self.entry_nome = tk.Entry(self.frame_produto)
-        self.entry_nome.grid(row=0, column=1)
+        self.label_nome.grid(row=0, column=0, padx=5, pady=5, sticky="e")
+        self.entry_nome = tk.Entry(self.frame_produto, width=50)  # Definindo largura do Entry
+        self.entry_nome.grid(row=0, column=1, padx=(0, 10), pady=5, sticky="ew")  # Ajustando padx para separação dos botões
 
         self.label_preco = tk.Label(self.frame_produto, text="Preço:")
-        self.label_preco.grid(row=1, column=0)
-        self.entry_preco = tk.Entry(self.frame_produto)
-        self.entry_preco.grid(row=1, column=1)
+        self.label_preco.grid(row=1, column=0, padx=5, pady=5, sticky="e")
+        self.entry_preco = tk.Entry(self.frame_produto, width=20)  # Definindo largura do Entry
+        self.entry_preco.grid(row=1, column=1, padx=(0, 10), pady=5, sticky="ew")  # Ajustando padx para separação dos botões
 
         self.label_quantidade = tk.Label(self.frame_produto, text="Quantidade:")
-        self.label_quantidade.grid(row=2, column=0)
-        self.entry_quantidade = tk.Entry(self.frame_produto)
-        self.entry_quantidade.grid(row=2, column=1)
+        self.label_quantidade.grid(row=2, column=0, padx=5, pady=5, sticky="e")
+        self.entry_quantidade = tk.Entry(self.frame_produto, width=10)  # Definindo largura do Entry
+        self.entry_quantidade.grid(row=2, column=1, padx=(0, 10), pady=5, sticky="ew")  # Ajustando padx para separação dos botões
 
-        self.button_adicionar = tk.Button(self.frame_lateral, text="Adicionar Produto", command=self.adicionar_produto)
-        self.button_adicionar.pack(pady=5)
+        self.frame_botoes = tk.Frame(self)
+        self.frame_botoes.pack(pady=10)
 
-        self.button_editar = tk.Button(self.frame_lateral, text="Editar Produto", command=self.editar_produto)
-        self.button_editar.pack(pady=5)
+        self.button_adicionar = tk.Button(self.frame_botoes, text="Adicionar Produto", command=self.adicionar_produto)
+        self.button_adicionar.grid(row=0, column=0, padx=5, pady=5, sticky="ew")
 
-        self.button_salvar = tk.Button(self.frame_lateral, text="Salvar Alterações", command=self.salvar_alteracoes)
-        self.button_salvar.pack(pady=5)
+        self.button_editar = tk.Button(self.frame_botoes, text="Editar Produto", command=self.editar_produto)
+        self.button_editar.grid(row=0, column=1, padx=5, pady=5)
+
+        self.button_salvar = tk.Button(self.frame_botoes, text="Salvar Alterações", command=self.salvar_alteracoes)
+        self.button_salvar.grid(row=0, column=2, padx=5, pady=5, sticky="ew")
         self.button_salvar["state"] = "disabled"
 
-        self.button_excluir = tk.Button(self.frame_lateral, text="Excluir Produto", command=self.excluir_produto)
-        self.button_excluir.pack(pady=5)
+        self.button_excluir = tk.Button(self.frame_botoes, text="Excluir Produto", command=self.excluir_produto)
+        self.button_excluir.grid(row=0, column=3, padx=5, pady=5, sticky="ew")
 
-        # Frame para a lista de produtos
-        self.frame_lista = tk.Frame(self.frame_principal)
-        self.frame_lista.pack(side=tk.LEFT, padx=10)
+        # Configurar a coluna 1 do frame_produto para se redimensionar ao redor dos botões
+        self.frame_produto.grid_columnconfigure(1, weight=1)
 
-        self.tree_produtos = ttk.Treeview(self.frame_lista, columns=("ID", "Nome", "Preço", "Quantidade"), show="headings")
+        self.tree_produtos = ttk.Treeview(self, columns=("ID", "Nome", "Preço", "Quantidade"), show="headings")
         self.tree_produtos.heading("ID", text="ID")
         self.tree_produtos.heading("Nome", text="Nome")
         self.tree_produtos.heading("Preço", text="Preço")
@@ -76,6 +71,7 @@ class GerenciamentoEstoque(tk.Frame):
         conexao.close()
 
         self.carregar_produtos()
+        self.limpa_campos()
         messagebox.showinfo("Sucesso", "Produto adicionado com sucesso!")
 
     def editar_produto(self):
@@ -114,14 +110,16 @@ class GerenciamentoEstoque(tk.Frame):
 
         self.produto_id = None
         self.carregar_produtos()
+        self.limpa_campos()
+
+        messagebox.showinfo("Sucesso", "Produto atualizado com sucesso!")
+
+    def limpa_campos(self):
         self.entry_nome.delete(0, tk.END)
         self.entry_preco.delete(0, tk.END)
         self.entry_quantidade.delete(0, tk.END)
-
         self.button_adicionar["state"] = "normal"
         self.button_salvar["state"] = "disabled"
-
-        messagebox.showinfo("Sucesso", "Produto atualizado com sucesso!")
 
     def excluir_produto(self):
         selected_item = self.tree_produtos.selection()
