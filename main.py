@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import ttk
 from database import criar_banco_de_dados
 from estoque import GerenciamentoEstoque
+from compras import RegistroCompras
 from vendas import RegistroVendas
 from relatorios import GeracaoRelatorios
 
@@ -16,10 +17,12 @@ class SistemaEstoqueVendas(tk.Tk):
         self.tabs.pack(expand=1, fill="both")
 
         self.tab_estoque = GerenciamentoEstoque(self.tabs)
+        self.tab_compras = RegistroCompras(self.tabs)
         self.tab_vendas = RegistroVendas(self.tabs)
         self.tab_relatorios = GeracaoRelatorios(self.tabs)
 
         self.tabs.add(self.tab_estoque, text="Gerenciamento de Estoque")
+        self.tabs.add(self.tab_compras, text="Registro de Compras")
         self.tabs.add(self.tab_vendas, text="Registro de Vendas")
         self.tabs.add(self.tab_relatorios, text="Relatórios")
 
@@ -29,6 +32,13 @@ class SistemaEstoqueVendas(tk.Tk):
     def on_tab_changed(self, event):
         selected_tab = event.widget.tab('current')['text']
         if selected_tab == "Registro de Vendas":
+            self.tab_compras.atualizar_combo_produto()
+            self.tab_vendas.atualizar_combo_produto()
+            self.tab_estoque.limpa_campos()
+            self.tab_estoque.carregar_produtos()
+
+        if selected_tab == "Registro de Compras":
+            self.tab_compras.atualizar_combo_produto()
             self.tab_vendas.atualizar_combo_produto()
             self.tab_estoque.limpa_campos()
             self.tab_estoque.carregar_produtos()

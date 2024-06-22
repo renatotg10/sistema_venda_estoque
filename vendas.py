@@ -39,7 +39,7 @@ class RegistroVendas(tk.Frame):
         self.carregar_vendas()
 
     def carregar_produtos_venda(self):
-        conexao = sqlite3.connect('estoque_vendas.db')
+        conexao = sqlite3.connect('estoque.db')
         cursor = conexao.cursor()
         cursor.execute('SELECT id, nome FROM produtos WHERE ativo = 1')
         produtos = cursor.fetchall()
@@ -61,7 +61,7 @@ class RegistroVendas(tk.Frame):
         quantidade = int(quantidade)
         produto_id = int(produto_selecionado.split(" - ")[0])
 
-        conexao = sqlite3.connect('estoque_vendas.db')
+        conexao = sqlite3.connect('estoque.db')
         cursor = conexao.cursor()
         cursor.execute('SELECT preco, quantidade FROM produtos WHERE id = ?', (produto_id,))
         produto = cursor.fetchone()
@@ -86,7 +86,7 @@ class RegistroVendas(tk.Frame):
         for i in self.tree_vendas.get_children():
             self.tree_vendas.delete(i)
 
-        conexao = sqlite3.connect('estoque_vendas.db')
+        conexao = sqlite3.connect('estoque.db')
         cursor = conexao.cursor()
         cursor.execute('''
         SELECT vendas.id, produtos.nome, vendas.quantidade, vendas.total, vendas.data_venda 

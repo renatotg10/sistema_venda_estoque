@@ -71,7 +71,7 @@ class GerenciamentoEstoque(tk.Frame):
         preco = float(self.entry_preco.get())
         quantidade = int(self.entry_quantidade.get())
 
-        conexao = sqlite3.connect('estoque_vendas.db')
+        conexao = sqlite3.connect('estoque.db')
         cursor = conexao.cursor()
         cursor.execute('INSERT INTO produtos (nome, preco, quantidade, ativo) VALUES (?, ?, ?, 1)', (nome, preco, quantidade))
         conexao.commit()
@@ -109,7 +109,7 @@ class GerenciamentoEstoque(tk.Frame):
         preco = float(self.entry_preco.get())
         quantidade = int(self.entry_quantidade.get())
 
-        conexao = sqlite3.connect('estoque_vendas.db')
+        conexao = sqlite3.connect('estoque.db')
         cursor = conexao.cursor()
         cursor.execute('UPDATE produtos SET nome = ?, preco = ?, quantidade = ? WHERE id = ?', (nome, preco, quantidade, self.produto_id))
         conexao.commit()
@@ -139,7 +139,7 @@ class GerenciamentoEstoque(tk.Frame):
 
         resposta = messagebox.askyesno("Confirmar Exclusão", "Tem certeza que deseja excluir este produto?")
         if resposta:
-            conexao = sqlite3.connect('estoque_vendas.db')
+            conexao = sqlite3.connect('estoque.db')
             cursor = conexao.cursor()
             cursor.execute("UPDATE produtos SET ativo = 0 WHERE id = ?", (produto_id,))
             conexao.commit()
@@ -152,7 +152,7 @@ class GerenciamentoEstoque(tk.Frame):
         for i in self.tree_produtos.get_children():
             self.tree_produtos.delete(i)
 
-        conexao = sqlite3.connect('estoque_vendas.db')
+        conexao = sqlite3.connect('estoque.db')
         cursor = conexao.cursor()
         cursor.execute('SELECT * FROM produtos WHERE ativo = 1')
         produtos = cursor.fetchall()
@@ -165,7 +165,7 @@ class GerenciamentoEstoque(tk.Frame):
         for i in self.tree_produtos.get_children():
             self.tree_produtos.delete(i)
 
-        conexao = sqlite3.connect('estoque_vendas.db')
+        conexao = sqlite3.connect('estoque.db')
         cursor = conexao.cursor()
         cursor.execute('SELECT * FROM produtos WHERE ativo = 0')
         produtos = cursor.fetchall()
@@ -187,7 +187,7 @@ class GerenciamentoEstoque(tk.Frame):
 
         resposta = messagebox.askyesno("Confirmar Restauração", "Tem certeza que deseja restaurar este produto?")
         if resposta:
-            conexao = sqlite3.connect('estoque_vendas.db')
+            conexao = sqlite3.connect('estoque.db')
             cursor = conexao.cursor()
             cursor.execute("UPDATE produtos SET ativo = 1 WHERE id = ?", (produto_id,))
             conexao.commit()

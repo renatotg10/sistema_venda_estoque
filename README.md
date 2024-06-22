@@ -32,13 +32,13 @@ O PyInstaller faz o seguinte:
 #### Para Linux
 
 ```bash
-pyinstaller --onefile --add-data 'estoque_vendas.db:.' main.py
+pyinstaller --onefile --add-data 'estoque.db:.' main.py
 ```
 
 #### Para Windows
 
 ```bash
-pyinstaller --onefile --add-data 'estoque_vendas.db;.' main.py
+pyinstaller --onefile --add-data 'estoque.db;.' main.py
 ```
 
 ### Executar o Executável
@@ -105,7 +105,7 @@ Você pode precisar ajustar algumas opções para seu caso específico. Aqui est
   Você pode incluir arquivos adicionais usando a opção `--add-data`. O formato é `source:destination`.
 
   ```bash
-  pyinstaller --onefile --add-data 'estoque_vendas.db:.' main.py
+  pyinstaller --onefile --add-data 'estoque.db:.' main.py
   ```
 
 ### Exemplo Completo
@@ -122,7 +122,7 @@ Aqui está um exemplo completo, assumindo que você quer criar um executável pa
 
    ```bash
    cd /caminho/para/seu/projeto
-   pyinstaller --onefile --add-data 'estoque_vendas.db:.' --name sisvenda main.py
+   pyinstaller --onefile --add-data 'estoque.db:.' --name sisvenda main.py
    ```
 
 3. **Encontre o executável no diretório `dist`**:

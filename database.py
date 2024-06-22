@@ -1,7 +1,7 @@
 import sqlite3
 
 def criar_banco_de_dados():
-    conexao = sqlite3.connect('estoque_vendas.db')
+    conexao = sqlite3.connect('estoque.db')
     cursor = conexao.cursor()
     
     cursor.execute('''
@@ -11,6 +11,17 @@ def criar_banco_de_dados():
         preco REAL NOT NULL,
         quantidade INTEGER NOT NULL,
         ativo INTEGER NOT NULL DEFAULT 1
+    )
+    ''')
+    
+    cursor.execute('''
+    CREATE TABLE IF NOT EXISTS compras (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        produto_id INTEGER,
+        quantidade INTEGER,
+        total REAL,
+        data_compra TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (produto_id) REFERENCES produtos(id)
     )
     ''')
     
