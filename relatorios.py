@@ -22,7 +22,7 @@ class GeracaoRelatorios(tk.Frame):
         data_hora_atual = datetime.now()
 
         # Formata a data atual no formato desejado (dia/mês/ano)
-        data_formatada = data_hora_atual.strftime('%d/%m/%Y')
+        data_formatada = data_hora_atual.strftime('%d/%m/%Y às %H:%M')
 
         return data_formatada
 
@@ -49,7 +49,7 @@ class GeracaoRelatorios(tk.Frame):
         produtos = cursor.fetchall()
         conexao.close()
 
-        relatorio = f"Data: {self.data_atual()} - Relatório de Estoque\n\n"
+        relatorio = f"Relatório de Estoque - Gerado em {self.data_atual()}\n\n"
         relatorio += f"{'ID':<5}{'Nome':<30}{'Preço':<10}{'Quantidade':<10}\n"
         relatorio += "-" * 55 + "\n"
 
@@ -70,7 +70,7 @@ class GeracaoRelatorios(tk.Frame):
         vendas = cursor.fetchall()
         conexao.close()
 
-        relatorio = "Relatório de Vendas:\n\n"
+        relatorio = f"Relatório de Vendas - Gerado em {self.data_atual()}\n\n"
         relatorio += f"{'ID':<5}{'Produto':<30}{'Quantidade':<15}{'Total':<10}{'Data':<20}\n"
         relatorio += "-" * 70 + "\n"
 
@@ -91,7 +91,7 @@ class GeracaoRelatorios(tk.Frame):
         compras = cursor.fetchall()
         conexao.close()
 
-        relatorio = "Relatório de compras:\n\n"
+        relatorio = f"Relatório de Compras - Gerado em {self.data_atual()}\n\n"
         relatorio += f"{'ID':<5}{'Produto':<30}{'Quantidade':<15}{'Total':<10}{'Data':<20}\n"
         relatorio += "-" * 70 + "\n"
 
