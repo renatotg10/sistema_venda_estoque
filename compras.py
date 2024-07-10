@@ -66,10 +66,6 @@ class RegistroCompras(tk.Frame):
         cursor.execute('SELECT preco, quantidade FROM produtos WHERE id = ?', (produto_id,))
         produto = cursor.fetchone()
 
-        if quantidade > produto[1]:
-            messagebox.showerror("Erro", "Quantidade em estoque insuficiente!")
-            return
-
         total = produto[0] * quantidade
         nova_quantidade = produto[1] + quantidade
 
