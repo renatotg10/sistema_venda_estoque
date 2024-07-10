@@ -68,7 +68,33 @@ class GerenciamentoEstoque(tk.Frame):
 
         self.carregar_produtos()
 
+    def verificar_campos_preenchidos(self):
+        nome = self.entry_nome.get().strip()
+        preco = self.entry_preco.get().strip()
+        status = self.combobox_status.get().strip()
+
+        if not nome:
+            messagebox.showerror("Erro", "O campo Nome é obrigatório.")
+            return False
+        if not preco:
+            messagebox.showerror("Erro", "O campo Preço é obrigatório.")
+            return False
+        if not status:
+            messagebox.showerror("Erro", "O campo Status é obrigatório.")
+            return False
+
+        try:
+            float(preco)
+        except ValueError:
+            messagebox.showerror("Erro", "O campo Preço deve ser um número.")
+            return False
+
+        return True
+
     def adicionar_produto(self):
+        if not self.verificar_campos_preenchidos():
+            return
+    
         nome = self.entry_nome.get()
         preco = float(self.entry_preco.get())
         # quantidade = int(self.entry_quantidade.get())
@@ -108,6 +134,9 @@ class GerenciamentoEstoque(tk.Frame):
 
     def salvar_alteracoes(self):
         if self.produto_id is None:
+            return
+        
+        if not self.verificar_campos_preenchidos():
             return
 
         nome = self.entry_nome.get()
