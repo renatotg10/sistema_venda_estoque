@@ -49,16 +49,6 @@ class GerenciamentoEstoque(tk.Frame):
         self.button_salvar.grid(row=0, column=2, padx=5, pady=5, sticky="ew")
         self.button_salvar["state"] = "disabled"
 
-        self.button_excluir = tk.Button(self.frame_botoes, text="Excluir Produto", command=self.excluir_produto)
-        self.button_excluir.grid(row=0, column=3, padx=5, pady=5, sticky="ew")
-
-        self.button_excluidos = tk.Button(self.frame_botoes, text="Produtos Excluídos", command=self.listar_produtos_excluidos)
-        self.button_excluidos.grid(row=0, column=4, padx=5, pady=5, sticky="ew")
-
-        self.button_restaurar = tk.Button(self.frame_botoes, text="Restaurar Produto", command=self.restaurar_produto)
-        self.button_restaurar.grid(row=0, column=5, padx=5, pady=5, sticky="ew")
-        self.button_restaurar["state"] = "disabled"
-
         # Configurar a coluna 1 do frame_produto para se redimensionar ao redor dos botões
         self.frame_produto.grid_columnconfigure(1, weight=1)
 
@@ -88,6 +78,7 @@ class GerenciamentoEstoque(tk.Frame):
         self.limpa_campos()
         messagebox.showinfo("Sucesso", "Produto adicionado com sucesso!")
 
+
     def editar_produto(self):
         selected_item = self.tree_produtos.selection()
         if not selected_item:
@@ -104,10 +95,11 @@ class GerenciamentoEstoque(tk.Frame):
         self.entry_preco.insert(0, produto[2])
         self.entry_quantidade.delete(0, tk.END)
         self.entry_quantidade.insert(0, produto[3])
-        self.combobox_status.set("Ativo" if produto[4] == "Ativo" else "Inativo")
+        self.combobox_status.set(produto[4])  # Atualizando o status do produto
 
         self.button_adicionar["state"] = "disabled"
         self.button_salvar["state"] = "normal"
+
 
 
     def salvar_alteracoes(self):
@@ -139,77 +131,16 @@ class GerenciamentoEstoque(tk.Frame):
         self.button_adicionar["state"] = "normal"
         self.button_salvar["state"] = "disabled"
 
-
-    def excluir_produto(self):
-        selected_item = self.tree_produtos.selection()
-        if not selected_item:
-            messagebox.showerror("Erro", "Selecione um produto para excluir!")
-            return
-
-        item = self.tree_produtos.item(selected_item)
-        produto_id = item['values'][0]
-
-        resposta = messagebox.askyesno("Confirmar Exclusão", "Tem certeza que deseja excluir este produto?")
-        if resposta:
-            conexao = sqlite3.connect('estoque.db')
-            cursor = conexao.cursor()
-            cursor.execute("UPDATE produtos SET ativo = 0 WHERE id = ?", (produto_id,))
-            conexao.commit()
-            conexao.close()
-
-            self.carregar_produtos()
-            messagebox.showinfo("Sucesso", "Produto excluído com sucesso!")
-
     def carregar_produtos(self):
         for i in self.tree_produtos.get_children():
             self.tree_produtos.delete(i)
 
         conexao = sqlite3.connect('estoque.db')
         cursor = conexao.cursor()
-        cursor.execute('SELECT id, nome, preco, quantidade, ativo FROM produtos WHERE ativo = 1')
+        cursor.execute('SELECT id, nome, preco, quantidade, ativo FROM produtos')
         produtos = cursor.fetchall()
         conexao.close()
 
         for produto in produtos:
             status = "Ativo" if produto[4] == 1 else "Inativo"
             self.tree_produtos.insert("", "end", values=(produto[0], produto[1], produto[2], produto[3], status))
-
-
-    def listar_produtos_excluidos(self):
-        for i in self.tree_produtos.get_children():
-            self.tree_produtos.delete(i)
-
-        conexao = sqlite3.connect('estoque.db')
-        cursor = conexao.cursor()
-        cursor.execute('SELECT id, nome, preco, quantidade, ativo FROM produtos WHERE ativo = 0')
-        produtos = cursor.fetchall()
-        conexao.close()
-
-        for produto in produtos:
-            status = "Ativo" if produto[4] == 1 else "Inativo"
-            self.tree_produtos.insert("", "end", values=(produto[0], produto[1], produto[2], produto[3], status))
-
-        self.button_restaurar["state"] = "normal"
-
-
-
-    def restaurar_produto(self):
-        selected_item = self.tree_produtos.selection()
-        if not selected_item:
-            messagebox.showerror("Erro", "Selecione um produto para restaurar!")
-            return
-
-        item = self.tree_produtos.item(selected_item)
-        produto_id = item['values'][0]
-
-        resposta = messagebox.askyesno("Confirmar Restauração", "Tem certeza que deseja restaurar este produto?")
-        if resposta:
-            conexao = sqlite3.connect('estoque.db')
-            cursor = conexao.cursor()
-            cursor.execute("UPDATE produtos SET ativo = 1 WHERE id = ?", (produto_id,))
-            conexao.commit()
-            conexao.close()
-
-            self.carregar_produtos()
-            self.button_restaurar["state"] = "disabled"
-            messagebox.showinfo("Sucesso", "Produto resturado com sucesso!")
