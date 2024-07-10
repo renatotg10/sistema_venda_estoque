@@ -31,6 +31,11 @@ class GerenciamentoEstoque(tk.Frame):
         self.entry_quantidade = tk.Entry(self.frame_produto, width=10)  # Definindo largura do Entry
         self.entry_quantidade.grid(row=2, column=1, padx=(0, 10), pady=5, sticky="ew")  # Ajustando padx para separação dos botões
 
+        self.label_status = tk.Label(self.frame_produto, text="Status:")
+        self.label_status.grid(row=3, column=0, padx=5, pady=5, sticky="e")
+        self.combobox_status = ttk.Combobox(self.frame_produto, values=["Ativo", "Inativo"])
+        self.combobox_status.grid(row=3, column=1, padx=(0, 10), pady=5, sticky="ew")
+
         self.frame_botoes = tk.Frame(self)
         self.frame_botoes.pack(pady=10)
 
@@ -57,11 +62,12 @@ class GerenciamentoEstoque(tk.Frame):
         # Configurar a coluna 1 do frame_produto para se redimensionar ao redor dos botões
         self.frame_produto.grid_columnconfigure(1, weight=1)
 
-        self.tree_produtos = ttk.Treeview(self, columns=("ID", "Nome", "Preço", "Quantidade"), show="headings")
+        self.tree_produtos = ttk.Treeview(self, columns=("ID", "Nome", "Preço", "Quantidade", "Status"), show="headings")
         self.tree_produtos.heading("ID", text="ID")
         self.tree_produtos.heading("Nome", text="Nome")
         self.tree_produtos.heading("Preço", text="Preço")
         self.tree_produtos.heading("Quantidade", text="Quantidade")
+        self.tree_produtos.heading("Status", text="Status")
         self.tree_produtos.pack(pady=10)
 
         self.carregar_produtos()
@@ -70,10 +76,11 @@ class GerenciamentoEstoque(tk.Frame):
         nome = self.entry_nome.get()
         preco = float(self.entry_preco.get())
         quantidade = int(self.entry_quantidade.get())
+        status = 1 if self.combobox_status.get() == "Ativo" else 0
 
         conexao = sqlite3.connect('estoque.db')
         cursor = conexao.cursor()
-        cursor.execute('INSERT INTO produtos (nome, preco, quantidade, ativo) VALUES (?, ?, ?, 1)', (nome, preco, quantidade))
+        cursor.execute('INSERT INTO produtos (nome, preco, quantidade, ativo) VALUES (?, ?, ?, ?)', (nome, preco, quantidade, status))
         conexao.commit()
         conexao.close()
 
@@ -97,9 +104,11 @@ class GerenciamentoEstoque(tk.Frame):
         self.entry_preco.insert(0, produto[2])
         self.entry_quantidade.delete(0, tk.END)
         self.entry_quantidade.insert(0, produto[3])
+        self.combobox_status.set("Ativo" if produto[4] == "Ativo" else "Inativo")
 
         self.button_adicionar["state"] = "disabled"
         self.button_salvar["state"] = "normal"
+
 
     def salvar_alteracoes(self):
         if self.produto_id is None:
@@ -108,10 +117,11 @@ class GerenciamentoEstoque(tk.Frame):
         nome = self.entry_nome.get()
         preco = float(self.entry_preco.get())
         quantidade = int(self.entry_quantidade.get())
+        status = 1 if self.combobox_status.get() == "Ativo" else 0
 
         conexao = sqlite3.connect('estoque.db')
         cursor = conexao.cursor()
-        cursor.execute('UPDATE produtos SET nome = ?, preco = ?, quantidade = ? WHERE id = ?', (nome, preco, quantidade, self.produto_id))
+        cursor.execute('UPDATE produtos SET nome = ?, preco = ?, quantidade = ?, ativo = ? WHERE id = ?', (nome, preco, quantidade, status, self.produto_id))
         conexao.commit()
         conexao.close()
 
@@ -125,8 +135,10 @@ class GerenciamentoEstoque(tk.Frame):
         self.entry_nome.delete(0, tk.END)
         self.entry_preco.delete(0, tk.END)
         self.entry_quantidade.delete(0, tk.END)
+        self.combobox_status.set('')
         self.button_adicionar["state"] = "normal"
         self.button_salvar["state"] = "disabled"
+
 
     def excluir_produto(self):
         selected_item = self.tree_produtos.selection()
@@ -154,12 +166,14 @@ class GerenciamentoEstoque(tk.Frame):
 
         conexao = sqlite3.connect('estoque.db')
         cursor = conexao.cursor()
-        cursor.execute('SELECT * FROM produtos WHERE ativo = 1')
+        cursor.execute('SELECT id, nome, preco, quantidade, ativo FROM produtos WHERE ativo = 1')
         produtos = cursor.fetchall()
         conexao.close()
 
         for produto in produtos:
-            self.tree_produtos.insert("", "end", values=produto)
+            status = "Ativo" if produto[4] == 1 else "Inativo"
+            self.tree_produtos.insert("", "end", values=(produto[0], produto[1], produto[2], produto[3], status))
+
 
     def listar_produtos_excluidos(self):
         for i in self.tree_produtos.get_children():
@@ -167,14 +181,17 @@ class GerenciamentoEstoque(tk.Frame):
 
         conexao = sqlite3.connect('estoque.db')
         cursor = conexao.cursor()
-        cursor.execute('SELECT * FROM produtos WHERE ativo = 0')
+        cursor.execute('SELECT id, nome, preco, quantidade, ativo FROM produtos WHERE ativo = 0')
         produtos = cursor.fetchall()
         conexao.close()
 
         for produto in produtos:
-            self.tree_produtos.insert("", "end", values=produto)
+            status = "Ativo" if produto[4] == 1 else "Inativo"
+            self.tree_produtos.insert("", "end", values=(produto[0], produto[1], produto[2], produto[3], status))
 
         self.button_restaurar["state"] = "normal"
+
+
 
     def restaurar_produto(self):
         selected_item = self.tree_produtos.selection()
