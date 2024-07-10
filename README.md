@@ -1,4 +1,4 @@
-# 
+# Sistema de Vendas com controle de Estoque
 
 É possível gerar um executável de um programa Python no Linux e no Windows usando ferramentas como `PyInstaller`. Aqui estão os passos básicos para criar um executável a partir do seu script Python.
 
