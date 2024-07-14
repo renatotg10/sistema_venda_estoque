@@ -1,12 +1,22 @@
 import tkinter as tk
 from tkinter import messagebox, ttk
 import sqlite3
+from datetime import datetime
 
 class RegistroCompras(tk.Frame):
     def __init__(self, master=None):
         super().__init__(master)
         self.pack()
         self.create_widgets()
+
+    def converter_data(self, data_hora_str):
+        # Converte a string para um objeto datetime
+        data_hora_obj = datetime.strptime(data_hora_str, '%Y-%m-%d %H:%M:%S')
+
+        # Formata o objeto datetime para o formato desejado
+        data_formatada = data_hora_obj.strftime('%d/%m/%Y %H:%M:%S')
+
+        return data_formatada
 
     def create_widgets(self):
         self.label_titulo_compras = tk.Label(self, text="Registro de Compras")
@@ -105,7 +115,13 @@ class RegistroCompras(tk.Frame):
         conexao.close()
 
         for compra in compras:
-            self.tree_compras.insert("", "end", values=compra)
+            compra_id = compra[0]
+            produto_nome = compra[1]
+            quantidade = compra[2]
+            total = compra[3]
+            data_compra = self.converter_data(compra[4])
+
+            self.tree_compras.insert("", "end", values=(compra_id, produto_nome, quantidade, total, data_compra))
 
     def atualizar_combo_produto(self):
         self.carregar_produtos_compra()
