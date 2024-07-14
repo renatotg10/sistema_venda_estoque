@@ -62,7 +62,7 @@ class GerenciamentoEstoque(tk.Frame):
 
         self.tree_produtos.column("ID", width=50, anchor="center")
         self.tree_produtos.column("Nome", width=150, anchor="w")
-        self.tree_produtos.column("Preço", width=100, anchor="w")
+        self.tree_produtos.column("Preço", width=100, anchor="e")
         self.tree_produtos.column("Quantidade", width=100, anchor="center")
         self.tree_produtos.column("Status", width=100, anchor="center")
 
