@@ -16,17 +16,23 @@ class RegistroCompras(tk.Frame):
         self.frame_compra.pack(pady=10)
 
         self.label_produto = tk.Label(self.frame_compra, text="Produto:")
-        self.label_produto.grid(row=0, column=0)
-        self.combo_produto = ttk.Combobox(self.frame_compra)
-        self.combo_produto.grid(row=0, column=1)
+        self.label_produto.grid(row=0, column=0, padx=5, pady=5, sticky="e")
+        self.combo_produto = ttk.Combobox(self.frame_compra, width=30)
+        self.combo_produto.grid(row=0, column=1, padx=(0, 10), pady=5, sticky="ew")
 
         self.label_quantidade_compra = tk.Label(self.frame_compra, text="Quantidade:")
-        self.label_quantidade_compra.grid(row=1, column=0)
-        self.entry_quantidade_compra = tk.Entry(self.frame_compra)
-        self.entry_quantidade_compra.grid(row=1, column=1)
+        self.label_quantidade_compra.grid(row=1, column=0, padx=5, pady=5, sticky="e")
+        self.entry_quantidade_compra = tk.Entry(self.frame_compra, width=20)
+        self.entry_quantidade_compra.grid(row=1, column=1, padx=(0, 10), pady=5, sticky="ew")
 
-        self.button_vender = tk.Button(self.frame_compra, text="Registrar Compra", command=self.registrar_compra)
-        self.button_vender.grid(row=2, columnspan=2, pady=5)
+        self.frame_botoes = tk.Frame(self)
+        self.frame_botoes.pack(pady=10)
+
+        self.button_comprar = tk.Button(self.frame_botoes, text="Registrar Compra", command=self.registrar_compra)
+        self.button_comprar.grid(row=0, column=0, padx=5, pady=5, sticky="ew")
+
+        # Configurar a coluna 1 do frame_produto para se redimensionar ao redor dos botões
+        self.frame_compra.grid_columnconfigure(1, weight=1)
 
         self.tree_compras = ttk.Treeview(self, columns=("ID", "Produto", "Quantidade", "Total", "Data"), show="headings")
         self.tree_compras.heading("ID", text="ID")
@@ -34,7 +40,13 @@ class RegistroCompras(tk.Frame):
         self.tree_compras.heading("Quantidade", text="Quantidade")
         self.tree_compras.heading("Total", text="Total")
         self.tree_compras.heading("Data", text="Data")
-        self.tree_compras.pack(pady=10)
+        self.tree_compras.pack(pady=10, fill=tk.BOTH, expand=True)
+
+        self.tree_compras.column("ID", width=30, anchor="center")
+        self.tree_compras.column("Produto", width=150, anchor="w")
+        self.tree_compras.column("Quantidade", width=30, anchor="center")
+        self.tree_compras.column("Total", width=50, anchor="w")
+        self.tree_compras.column("Data", width=50, anchor="center")
 
         self.carregar_compras()
 
