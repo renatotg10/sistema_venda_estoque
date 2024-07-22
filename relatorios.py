@@ -13,7 +13,7 @@ class GeracaoRelatorios(tk.Frame):
         data_hora_obj = datetime.strptime(data_hora_str, '%Y-%m-%d %H:%M:%S')
 
         # Formata o objeto datetime para o formato desejado
-        data_formatada = data_hora_obj.strftime('%d/%m/%Y')
+        data_formatada = data_hora_obj.strftime('%d/%m/%Y %H:%M:%S')
 
         return data_formatada
     
@@ -93,7 +93,7 @@ class GeracaoRelatorios(tk.Frame):
 
         relatorio = f"Relatório de Compras - Gerado em {self.data_atual()}\n\n"
         relatorio += f"{'ID':<5}{'Produto':<30}{'Quantidade':<15}{'Total':<10}{'Data':<20}\n"
-        relatorio += "-" * 70 + "\n"
+        relatorio += "-" * 79 + "\n"
 
         for compra in compras:
             relatorio += f"{compra[0]:<5}{compra[1]:<30}{compra[2]:<15}{compra[3]:<10}{self.converter_data(compra[4]):<20}\n"
