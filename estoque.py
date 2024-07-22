@@ -33,7 +33,7 @@ class GerenciamentoEstoque(tk.Frame):
 
         self.label_status = tk.Label(self.frame_produto, text="Status:")
         self.label_status.grid(row=3, column=0, padx=5, pady=5, sticky="e")
-        self.combobox_status = ttk.Combobox(self.frame_produto, values=["Ativo", "Inativo"])
+        self.combobox_status = ttk.Combobox(self.frame_produto, values=["Ativo", "Inativo"], state='readonly')
         self.combobox_status.grid(row=3, column=1, padx=(0, 10), pady=5, sticky="ew")
 
         self.frame_botoes = tk.Frame(self)

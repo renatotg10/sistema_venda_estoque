@@ -27,7 +27,7 @@ class RegistroVendas(tk.Frame):
 
         self.label_produto = tk.Label(self.frame_venda, text="Produto:")
         self.label_produto.grid(row=0, column=0, padx=5, pady=5, sticky="e")
-        self.combo_produto = ttk.Combobox(self.frame_venda, width=50)
+        self.combo_produto = ttk.Combobox(self.frame_venda, width=50, state='readonly')
         self.combo_produto.grid(row=0, column=1, padx=(0, 10), pady=5, sticky="ew")
         self.combo_produto.bind("<<ComboboxSelected>>", self.atualizar_preco)
 
@@ -43,7 +43,7 @@ class RegistroVendas(tk.Frame):
 
         self.label_operacao = tk.Label(self.frame_venda, text="Operação:")
         self.label_operacao.grid(row=3, column=0, padx=5, pady=5, sticky="e")
-        self.combo_operacao = ttk.Combobox(self.frame_venda, values=["Venda", "Estorno"])
+        self.combo_operacao = ttk.Combobox(self.frame_venda, values=["Venda", "Estorno"], state='readonly')
         self.combo_operacao.grid(row=3, column=1, padx=(0, 10), pady=5, sticky="ew")
 
         self.label_observacao = tk.Label(self.frame_venda, text="Observação:")
@@ -171,6 +171,7 @@ class RegistroVendas(tk.Frame):
 
     def limpa_campos(self):
             self.entry_quantidade_venda.delete(0, tk.END)
+            self.entry_preco_venda.delete(0, tk.END)
             self.entry_observacao.delete(0, tk.END)
             self.combo_produto.set('')
             self.combo_operacao.set('')

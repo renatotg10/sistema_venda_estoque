@@ -27,7 +27,7 @@ class RegistroCompras(tk.Frame):
 
         self.label_produto = tk.Label(self.frame_compra, text="Produto:")
         self.label_produto.grid(row=0, column=0, padx=5, pady=5, sticky="e")
-        self.combo_produto = ttk.Combobox(self.frame_compra, width=50)
+        self.combo_produto = ttk.Combobox(self.frame_compra, width=50, state='readonly')
         self.combo_produto.grid(row=0, column=1, padx=(0, 10), pady=5, sticky="ew")
 
         self.label_quantidade_compra = tk.Label(self.frame_compra, text="Quantidade:")
@@ -37,7 +37,7 @@ class RegistroCompras(tk.Frame):
 
         self.label_operacao = tk.Label(self.frame_compra, text="Operação:")
         self.label_operacao.grid(row=2, column=0, padx=5, pady=5, sticky="e")
-        self.combo_operacao = ttk.Combobox(self.frame_compra, values=["Compra", "Estorno"])
+        self.combo_operacao = ttk.Combobox(self.frame_compra, values=["Compra", "Estorno"], state='readonly')
         self.combo_operacao.grid(row=2, column=1, padx=(0, 10), pady=5, sticky="ew")
 
         self.label_observacao = tk.Label(self.frame_compra, text="Observação:")
