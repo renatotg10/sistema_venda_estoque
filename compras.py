@@ -113,7 +113,6 @@ class RegistroCompras(tk.Frame):
         mensagem = "Compra registrada com sucesso!"
 
         if operacao == "Estorno":
-            total = total * -1
             nova_quantidade = produto[1] - quantidade
             mensagem = "Estorno registrado com sucesso!"
 
