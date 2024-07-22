@@ -29,21 +29,27 @@ class RegistroVendas(tk.Frame):
         self.label_produto.grid(row=0, column=0, padx=5, pady=5, sticky="e")
         self.combo_produto = ttk.Combobox(self.frame_venda, width=50)
         self.combo_produto.grid(row=0, column=1, padx=(0, 10), pady=5, sticky="ew")
+        self.combo_produto.bind("<<ComboboxSelected>>", self.atualizar_preco)
+
+        self.label_preco_venda = tk.Label(self.frame_venda, text="Preço Unitário:")
+        self.label_preco_venda.grid(row=1, column=0, padx=5, pady=5, sticky="e")
+        self.entry_preco_venda = tk.Entry(self.frame_venda, width=50)
+        self.entry_preco_venda.grid(row=1, column=1, padx=(0, 10), pady=5, sticky="ew")
 
         self.label_quantidade_venda = tk.Label(self.frame_venda, text="Quantidade:")
-        self.label_quantidade_venda.grid(row=1, column=0, padx=5, pady=5, sticky="e")
+        self.label_quantidade_venda.grid(row=2, column=0, padx=5, pady=5, sticky="e")
         self.entry_quantidade_venda = tk.Entry(self.frame_venda, width=50)
-        self.entry_quantidade_venda.grid(row=1, column=1, padx=(0, 10), pady=5, sticky="ew")
+        self.entry_quantidade_venda.grid(row=2, column=1, padx=(0, 10), pady=5, sticky="ew")
 
         self.label_operacao = tk.Label(self.frame_venda, text="Operação:")
-        self.label_operacao.grid(row=2, column=0, padx=5, pady=5, sticky="e")
+        self.label_operacao.grid(row=3, column=0, padx=5, pady=5, sticky="e")
         self.combo_operacao = ttk.Combobox(self.frame_venda, values=["Venda", "Estorno"])
-        self.combo_operacao.grid(row=2, column=1, padx=(0, 10), pady=5, sticky="ew")
+        self.combo_operacao.grid(row=3, column=1, padx=(0, 10), pady=5, sticky="ew")
 
         self.label_observacao = tk.Label(self.frame_venda, text="Observação:")
-        self.label_observacao.grid(row=3, column=0, padx=5, pady=5, sticky="e")
+        self.label_observacao.grid(row=4, column=0, padx=5, pady=5, sticky="e")
         self.entry_observacao = tk.Entry(self.frame_venda, width=50)
-        self.entry_observacao.grid(row=3, column=1, padx=(0, 10), pady=5, sticky="ew")
+        self.entry_observacao.grid(row=4, column=1, padx=(0, 10), pady=5, sticky="ew")
 
         self.frame_botoes = tk.Frame(self)
         self.frame_botoes.pack(pady=10)
@@ -90,6 +96,7 @@ class RegistroVendas(tk.Frame):
             return
 
         quantidade = self.entry_quantidade_venda.get()
+        preco = self.entry_preco_venda.get()
         if not quantidade.isdigit():
             messagebox.showerror("Erro", "Digite uma quantidade válida!")
             return
@@ -100,6 +107,7 @@ class RegistroVendas(tk.Frame):
             return
 
         quantidade = int(quantidade)
+        total = float(preco) * quantidade
         produto_id = int(produto_selecionado.split(" - ")[0])
         observacao = self.entry_observacao.get()
 
@@ -112,7 +120,6 @@ class RegistroVendas(tk.Frame):
             messagebox.showerror("Erro", "Quantidade em estoque insuficiente!")
             return
 
-        total = produto[0] * quantidade
         nova_quantidade = produto[1] - quantidade
         mensagem = "Venda registrada com sucesso!"
 
@@ -167,3 +174,20 @@ class RegistroVendas(tk.Frame):
             self.entry_observacao.delete(0, tk.END)
             self.combo_produto.set('')
             self.combo_operacao.set('')
+
+    def atualizar_preco(self, event):
+        produto_selecionado = self.combo_produto.get()
+        if produto_selecionado:
+            produto_id = int(produto_selecionado.split(" - ")[0])
+            
+            conexao = sqlite3.connect('estoque.db')
+            cursor = conexao.cursor()
+            cursor.execute('SELECT preco FROM produtos WHERE id = ?', (produto_id,))
+            produto = cursor.fetchone()
+            conexao.close()
+
+            if produto:
+                preco = produto[0]
+                self.entry_preco_venda.config(state='normal')
+                self.entry_preco_venda.delete(0, tk.END)
+                self.entry_preco_venda.insert(0, f"{preco:.2f}")
