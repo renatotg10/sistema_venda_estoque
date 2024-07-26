@@ -35,15 +35,20 @@ class RegistroCompras(tk.Frame):
         self.entry_quantidade_compra = tk.Entry(self.frame_compra, width=50)
         self.entry_quantidade_compra.grid(row=1, column=1, padx=(0, 10), pady=5, sticky="ew")
 
+        self.label_total_compra = tk.Label(self.frame_compra, text="Valor Total:")
+        self.label_total_compra.grid(row=2, column=0, padx=5, pady=5, sticky="e")
+        self.entry_total_compra = tk.Entry(self.frame_compra, width=50)
+        self.entry_total_compra.grid(row=2, column=1, padx=(0, 10), pady=5, sticky="ew")
+
         self.label_operacao = tk.Label(self.frame_compra, text="Operação:")
-        self.label_operacao.grid(row=2, column=0, padx=5, pady=5, sticky="e")
+        self.label_operacao.grid(row=3, column=0, padx=5, pady=5, sticky="e")
         self.combo_operacao = ttk.Combobox(self.frame_compra, values=["Compra", "Estorno"], state='readonly')
-        self.combo_operacao.grid(row=2, column=1, padx=(0, 10), pady=5, sticky="ew")
+        self.combo_operacao.grid(row=3, column=1, padx=(0, 10), pady=5, sticky="ew")
 
         self.label_observacao = tk.Label(self.frame_compra, text="Observação:")
-        self.label_observacao.grid(row=3, column=0, padx=5, pady=5, sticky="e")
+        self.label_observacao.grid(row=4, column=0, padx=5, pady=5, sticky="e")
         self.entry_observacao = tk.Entry(self.frame_compra, width=50)
-        self.entry_observacao.grid(row=3, column=1, padx=(0, 10), pady=5, sticky="ew")
+        self.entry_observacao.grid(row=4, column=1, padx=(0, 10), pady=5, sticky="ew")
 
         self.frame_botoes = tk.Frame(self)
         self.frame_botoes.pack(pady=10)
@@ -54,19 +59,21 @@ class RegistroCompras(tk.Frame):
         # Configurar a coluna 1 do frame_produto para se redimensionar ao redor dos botões
         self.frame_compra.grid_columnconfigure(1, weight=1)
 
-        self.tree_compras = ttk.Treeview(self, columns=("ID", "Produto", "Quantidade", "Total", "Data", "Operacao", "Observacao"), show="headings")
+        self.tree_compras = ttk.Treeview(self, columns=("ID", "Produto", "Quantidade", "Preco", "Total", "Data", "Operacao", "Observacao"), show="headings")
         self.tree_compras.heading("ID", text="ID")
         self.tree_compras.heading("Produto", text="Produto")
-        self.tree_compras.heading("Quantidade", text="Quantidade")
+        self.tree_compras.heading("Quantidade", text="Qtd")
+        self.tree_compras.heading("Preco", text="Preço Unit.")
         self.tree_compras.heading("Total", text="Total")
         self.tree_compras.heading("Data", text="Data")
         self.tree_compras.heading("Operacao", text="Operação")
         self.tree_compras.heading("Observacao", text="Observação")
         self.tree_compras.pack(pady=10, fill=tk.BOTH, expand=True)
 
-        self.tree_compras.column("ID", width=15, anchor="center")
+        self.tree_compras.column("ID", width=10, anchor="center")
         self.tree_compras.column("Produto", width=150, anchor="w")
-        self.tree_compras.column("Quantidade", width=15, anchor="center")
+        self.tree_compras.column("Quantidade", width=10, anchor="center")
+        self.tree_compras.column("Preco", width=30, anchor="e")
         self.tree_compras.column("Total", width=40, anchor="e")
         self.tree_compras.column("Data", width=50, anchor="center")
         self.tree_compras.column("Operacao", width=50, anchor="w")
@@ -99,7 +106,14 @@ class RegistroCompras(tk.Frame):
             messagebox.showerror("Erro", "Selecione uma operação!")
             return
 
+        total = self.entry_total_compra.get()
+        if not total:
+            messagebox.showerror("Erro", "Informe o valor total da compra.")
+            return
+
+        total = float(total)
         quantidade = int(quantidade)
+        preco = total / quantidade
         produto_id = int(produto_selecionado.split(" - ")[0])
         observacao = self.entry_observacao.get()
 
@@ -108,15 +122,15 @@ class RegistroCompras(tk.Frame):
         cursor.execute('SELECT preco, quantidade FROM produtos WHERE id = ?', (produto_id,))
         produto = cursor.fetchone()
 
-        total = produto[0] * quantidade
         nova_quantidade = produto[1] + quantidade
         mensagem = "Compra registrada com sucesso!"
 
         if operacao == "Estorno":
             nova_quantidade = produto[1] - quantidade
+            total = total * -1
             mensagem = "Estorno registrado com sucesso!"
 
-        cursor.execute('INSERT INTO compras (produto_id, operacao, quantidade, total, observacao) VALUES (?, ?, ?, ?, ?)', (produto_id, operacao, quantidade, total, observacao))
+        cursor.execute('INSERT INTO compras (produto_id, operacao, quantidade, preco, total, observacao) VALUES (?, ?, ?, ?, ?, ?)', (produto_id, operacao, quantidade, preco, total, observacao))
         cursor.execute('UPDATE produtos SET quantidade = ? WHERE id = ?', (nova_quantidade, produto_id))
         conexao.commit()
         conexao.close()
@@ -133,7 +147,7 @@ class RegistroCompras(tk.Frame):
         conexao = sqlite3.connect('estoque.db')
         cursor = conexao.cursor()
         cursor.execute('''
-        SELECT compras.id, produtos.nome, compras.quantidade, compras.total, compras.data_compra, compras.operacao, compras.observacao
+        SELECT compras.id, produtos.nome, compras.quantidade, compras.preco, compras.total, compras.data_compra, compras.operacao, compras.observacao
         FROM compras 
         JOIN produtos ON compras.produto_id = produtos.id
         ''')
@@ -144,15 +158,16 @@ class RegistroCompras(tk.Frame):
             compra_id = compra[0]
             produto_nome = compra[1]
             quantidade = compra[2]
-            total = compra[3]
-            data_compra = self.converter_data(compra[4])
-            operacao = compra[5]
+            preco = compra[3]
+            total = compra[4]
+            data_compra = self.converter_data(compra[5])
+            operacao = compra[6]
             if compra[6]:
-                observacao = compra[6]
+                observacao = compra[7]
             else:
                 observacao = ""
 
-            self.tree_compras.insert("", "end", values=(compra_id, produto_nome, quantidade, total, data_compra, operacao, observacao))
+            self.tree_compras.insert("", "end", values=(compra_id, produto_nome, quantidade, preco, total, data_compra, operacao, observacao))
 
     def atualizar_combo_produto(self):
         self.carregar_produtos_compra()
@@ -160,6 +175,7 @@ class RegistroCompras(tk.Frame):
 
     def limpa_campos(self):
             self.entry_quantidade_compra.delete(0, tk.END)
+            self.entry_total_compra.delete(0, tk.END)
             self.entry_observacao.delete(0, tk.END)
             self.combo_produto.set('')
             self.combo_operacao.set('')

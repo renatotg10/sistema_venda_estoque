@@ -21,7 +21,7 @@ class GerenciamentoEstoque(tk.Frame):
         self.entry_nome = tk.Entry(self.frame_produto, width=50)  # Definindo largura do Entry
         self.entry_nome.grid(row=0, column=1, padx=(0, 10), pady=5, sticky="ew")  # Ajustando padx para separação dos botões
 
-        self.label_preco = tk.Label(self.frame_produto, text="Preço:")
+        self.label_preco = tk.Label(self.frame_produto, text="Preço de Venda:")
         self.label_preco.grid(row=1, column=0, padx=5, pady=5, sticky="e")
         self.entry_preco = tk.Entry(self.frame_produto, width=20)  # Definindo largura do Entry
         self.entry_preco.grid(row=1, column=1, padx=(0, 10), pady=5, sticky="ew")  # Ajustando padx para separação dos botões
