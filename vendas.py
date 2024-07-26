@@ -60,19 +60,21 @@ class RegistroVendas(tk.Frame):
         # Configurar a coluna 1 do frame_produto para se redimensionar ao redor dos botões
         self.frame_venda.grid_columnconfigure(1, weight=1)
 
-        self.tree_vendas = ttk.Treeview(self, columns=("ID", "Produto", "Quantidade", "Total", "Data", "Operacao", "Observacao"), show="headings")
+        self.tree_vendas = ttk.Treeview(self, columns=("ID", "Produto", "Quantidade", "Preco", "Total", "Data", "Operacao", "Observacao"), show="headings")
         self.tree_vendas.heading("ID", text="ID")
         self.tree_vendas.heading("Produto", text="Produto")
-        self.tree_vendas.heading("Quantidade", text="Quantidade")
+        self.tree_vendas.heading("Quantidade", text="Qtd")
+        self.tree_vendas.heading("Preco", text="Preço Unit.")
         self.tree_vendas.heading("Total", text="Total")
         self.tree_vendas.heading("Data", text="Data")
         self.tree_vendas.heading("Operacao", text="Operação")
         self.tree_vendas.heading("Observacao", text="Observação")
         self.tree_vendas.pack(pady=10, fill=tk.BOTH, expand=True)
 
-        self.tree_vendas.column("ID", width=15, anchor="center")
+        self.tree_vendas.column("ID", width=10, anchor="center")
         self.tree_vendas.column("Produto", width=150, anchor="w")
-        self.tree_vendas.column("Quantidade", width=15, anchor="center")
+        self.tree_vendas.column("Quantidade", width=10, anchor="center")
+        self.tree_vendas.column("Preco", width=30, anchor="e")
         self.tree_vendas.column("Total", width=40, anchor="e")
         self.tree_vendas.column("Data", width=50, anchor="center")
         self.tree_vendas.column("Operacao", width=50, anchor="w")
@@ -96,7 +98,6 @@ class RegistroVendas(tk.Frame):
             return
 
         quantidade = self.entry_quantidade_venda.get()
-        preco = self.entry_preco_venda.get()
         if not quantidade.isdigit():
             messagebox.showerror("Erro", "Digite uma quantidade válida!")
             return
@@ -106,6 +107,11 @@ class RegistroVendas(tk.Frame):
             messagebox.showerror("Erro", "Selecione uma operação!")
             return
 
+        preco = self.entry_preco_venda.get()
+        if not preco:
+            messagebox.showerror("Erro", "Digite o preço unitário.")
+            return
+        
         quantidade = int(quantidade)
         total = float(preco) * quantidade
         produto_id = int(produto_selecionado.split(" - ")[0])
@@ -116,7 +122,7 @@ class RegistroVendas(tk.Frame):
         cursor.execute('SELECT preco, quantidade FROM produtos WHERE id = ?', (produto_id,))
         produto = cursor.fetchone()
 
-        if quantidade > produto[1]:
+        if quantidade > produto[1] and operacao == "Venda":
             messagebox.showerror("Erro", "Quantidade em estoque insuficiente!")
             return
 
@@ -124,10 +130,11 @@ class RegistroVendas(tk.Frame):
         mensagem = "Venda registrada com sucesso!"
 
         if operacao == "Estorno":
+            total = total * -1
             nova_quantidade = produto[1] + quantidade
             mensagem = "Estorno registrado com sucesso!"
 
-        cursor.execute('INSERT INTO vendas (produto_id, operacao, quantidade, total, observacao) VALUES (?, ?, ?, ?, ?)', (produto_id, operacao, quantidade, total, observacao))
+        cursor.execute('INSERT INTO vendas (produto_id, operacao, quantidade, preco, total, observacao) VALUES (?, ?, ?, ?, ?, ?)', (produto_id, operacao, quantidade, preco, total, observacao))
         cursor.execute('UPDATE produtos SET quantidade = ? WHERE id = ?', (nova_quantidade, produto_id))
         conexao.commit()
         conexao.close()
@@ -144,7 +151,7 @@ class RegistroVendas(tk.Frame):
         conexao = sqlite3.connect('estoque.db')
         cursor = conexao.cursor()
         cursor.execute('''
-        SELECT vendas.id, produtos.nome, vendas.quantidade, vendas.total, vendas.data_venda, vendas.operacao, vendas.observacao
+        SELECT vendas.id, produtos.nome, vendas.quantidade, vendas.preco, vendas.total, vendas.data_venda, vendas.operacao, vendas.observacao
         FROM vendas 
         JOIN produtos ON vendas.produto_id = produtos.id
         ''')
@@ -155,15 +162,16 @@ class RegistroVendas(tk.Frame):
             venda_id = venda[0]
             produto_nome = venda[1]
             quantidade = venda[2]
-            total = venda[3]
-            data_venda = self.converter_data(venda[4])
-            operacao = venda[5]
-            if venda[6]:
-                observacao = venda[6]
+            preco = venda[3]
+            total = venda[4]
+            data_venda = self.converter_data(venda[5])
+            operacao = venda[6]
+            if venda[7]:
+                observacao = venda[7]
             else:
                 observacao = ""
 
-            self.tree_vendas.insert("", "end", values=(venda_id, produto_nome, quantidade, total, data_venda, operacao, observacao))
+            self.tree_vendas.insert("", "end", values=(venda_id, produto_nome, quantidade, preco, total, data_venda, operacao, observacao))
 
     def atualizar_combo_produto(self):
         self.carregar_produtos_venda()
