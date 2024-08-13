@@ -39,7 +39,7 @@ class GeracaoRelatorios(tk.Frame):
         self.button_relatorio_compras = tk.Button(self, text="Relatório de Compras", command=self.gerar_relatorio_compras)
         self.button_relatorio_compras.pack(pady=5)
 
-        self.text_relatorio = tk.Text(self)
+        self.text_relatorio = tk.Text(self, width=120, height=20)
         self.text_relatorio.pack(pady=10)
 
     def gerar_relatorio_estoque(self):
