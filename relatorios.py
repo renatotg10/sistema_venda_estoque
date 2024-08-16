@@ -53,16 +53,22 @@ class GeracaoRelatorios(tk.Frame):
         conexao.close()
 
         relatorio = f"Relatório de Estoque - Gerado em {self.data_atual()}\n\n"
-        relatorio += f"{'ID':<5}{'Nome':<30}{'Preço':<10}{'Qtd':<10}{'Status':<10}\n"
+        relatorio += f"{'ID':<5}{'Nome':<30}{'Preço':>10}{'Qtd':>10}{'Status':>10}\n"
         relatorio += "-" * 65 + "\n"
+        total = 0
 
         for produto in produtos:
             status = "Ativo"
             if produto[4] == 0:
                 status = "Inativo"
 
-            relatorio += f"{produto[0]:<5}{produto[1]:<30}{produto[2]:<10}{produto[3]:<10}{status}\n"
+            relatorio += f"{produto[0]:<5}{produto[1]:<30}{produto[2]:>10.2f}{produto[3]:>10}{status:>10}\n"
 
+            total = total + produto[2]
+
+        relatorio += "-" * 65 + "\n"
+        relatorio += f"Total Estoque: R$ {total}\n"
+        relatorio += "-" * 65 + "\n"
         self.text_relatorio.delete(1.0, tk.END)
         self.text_relatorio.insert(tk.END, relatorio)
 
