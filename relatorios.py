@@ -86,7 +86,7 @@ class GeracaoRelatorios(tk.Frame):
         conexao.close()
 
         relatorio = f"Relatório de Vendas - Gerado em {self.data_atual()}\n\n"
-        relatorio += f"{'ID':<5}{'Produto':<30}{'Qtd':>15}{'Total':>10}{'Data/Hora':>25}\n"
+        relatorio += f"{'ID':<5}{'Produto':<30}{'Qtd':>15}{'Total':>10}{'Data':>25}\n"
         relatorio += "-" * 85 + "\n"
         total_venda = 0
         total_estorno = 0
@@ -125,7 +125,7 @@ class GeracaoRelatorios(tk.Frame):
         conexao.close()
 
         relatorio = f"Relatório de Compras - Gerado em {self.data_atual()}\n\n"
-        relatorio += f"{'ID':<5}{'Produto':<30}{'Qtd':>15}{'Total':>10}{'Data/Hora':>25}\n"
+        relatorio += f"{'ID':<5}{'Produto':<30}{'Qtd':>15}{'Total':>10}{'Data':>25}\n"
         relatorio += "-" * 85 + "\n"
         total_compra = 0
         total_estorno = 0
