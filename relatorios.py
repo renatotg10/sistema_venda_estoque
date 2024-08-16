@@ -30,14 +30,17 @@ class GeracaoRelatorios(tk.Frame):
         self.label_titulo_relatorios = tk.Label(self, text="Relatórios")
         self.label_titulo_relatorios.pack(pady=10)
 
-        self.button_relatorio_estoque = tk.Button(self, text="Relatório de Estoque", command=self.gerar_relatorio_estoque)
-        self.button_relatorio_estoque.pack(pady=5)
+        self.frame_botoes = tk.Frame(self)
+        self.frame_botoes.pack(pady=10)
 
-        self.button_relatorio_vendas = tk.Button(self, text="Relatório de Vendas", command=self.gerar_relatorio_vendas)
-        self.button_relatorio_vendas.pack(pady=5)
+        self.button_relatorio_estoque = tk.Button(self.frame_botoes, text="Relatório de Estoque", command=self.gerar_relatorio_estoque)
+        self.button_relatorio_estoque.grid(row=0, column=0, padx=5, pady=5, sticky="ew")
 
-        self.button_relatorio_compras = tk.Button(self, text="Relatório de Compras", command=self.gerar_relatorio_compras)
-        self.button_relatorio_compras.pack(pady=5)
+        self.button_relatorio_vendas = tk.Button(self.frame_botoes, text="Relatório de Vendas", command=self.gerar_relatorio_vendas)
+        self.button_relatorio_vendas.grid(row=0, column=1, padx=5, pady=5, sticky="ew")
+
+        self.button_relatorio_compras = tk.Button(self.frame_botoes, text="Relatório de Compras", command=self.gerar_relatorio_compras)
+        self.button_relatorio_compras.grid(row=0, column=2, padx=5, pady=5, sticky="ew")
 
         self.text_relatorio = tk.Text(self)
         self.text_relatorio.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
@@ -76,7 +79,7 @@ class GeracaoRelatorios(tk.Frame):
 
         relatorio = f"Relatório de Vendas - Gerado em {self.data_atual()}\n\n"
         relatorio += f"{'ID':<5}{'Produto':<30}{'Quantidade':<15}{'Total':<10}{'Data':<20}\n"
-        relatorio += "-" * 70 + "\n"
+        relatorio += "-" * 79 + "\n"
 
         for venda in vendas:
             relatorio += f"{venda[0]:<5}{venda[1]:<30}{venda[2]:<15}{venda[3]:<10}{self.converter_data(venda[4]):<20}\n"
