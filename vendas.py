@@ -148,13 +148,17 @@ class RegistroVendas(tk.Frame):
         for i in self.tree_vendas.get_children():
             self.tree_vendas.delete(i)
 
+        # Data atual no formato YYYY-MM-DD
+        data_atual = datetime.now().strftime('%Y-%m-%d')
+
         conexao = sqlite3.connect('estoque.db')
         cursor = conexao.cursor()
         cursor.execute('''
         SELECT vendas.id, produtos.nome, vendas.quantidade, vendas.preco, vendas.total, vendas.data_venda, vendas.operacao, vendas.observacao
         FROM vendas 
         JOIN produtos ON vendas.produto_id = produtos.id
-        ''')
+        WHERE DATE(vendas.data_venda) = ?
+        ''', (data_atual,))
         vendas = cursor.fetchall()
         conexao.close()
 
