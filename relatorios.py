@@ -86,14 +86,14 @@ class GeracaoRelatorios(tk.Frame):
         conexao.close()
 
         relatorio = f"Relatório de Vendas - Gerado em {self.data_atual()}\n\n"
-        relatorio += f"{'ID':<5}{'Produto':<30}{'Qtd':>15}{'Total':>10}{'Data':>25}\n"
+        relatorio += f"{'Data':<12}{'Produto':<48}{'Qtd':>4}{'Total':>12}{'Operação':>9}\n"
         relatorio += "-" * 85 + "\n"
         total_venda = 0
         total_estorno = 0
         total = 0
 
         for venda in vendas:
-            relatorio += f"{venda[0]:<5}{venda[1]:<30}{venda[2]:>15}{venda[3]:>10.2f}{self.converter_data(venda[4]):>25}\n"
+            relatorio += f"{self.converter_data(venda[4]):<12}{venda[1]:<48}{venda[2]:>4}{venda[3]:>12.2f}{venda[5]:>9}\n"
 
             if venda[5] == "Venda":
                 total_venda = total_venda + venda[3]
@@ -125,14 +125,14 @@ class GeracaoRelatorios(tk.Frame):
         conexao.close()
 
         relatorio = f"Relatório de Compras - Gerado em {self.data_atual()}\n\n"
-        relatorio += f"{'ID':<5}{'Produto':<30}{'Qtd':>15}{'Total':>10}{'Data':>25}\n"
+        relatorio += f"{'Data':<12}{'Produto':<48}{'Qtd':>4}{'Total':>12}{'Operação':>9}\n"
         relatorio += "-" * 85 + "\n"
         total_compra = 0
         total_estorno = 0
         total = 0
 
         for compra in compras:
-            relatorio += f"{compra[0]:<5}{compra[1]:<30}{compra[2]:>15}{compra[3]:>10.2f}{self.converter_data(compra[4]):>25}\n"
+            relatorio += f"{self.converter_data(compra[4]):<12}{compra[1]:<48}{compra[2]:>4}{compra[3]:>12.2f}{compra[5]:>9}\n"
 
             if compra[5] == "Compra":
                 total_compra = total_compra + compra[3]
