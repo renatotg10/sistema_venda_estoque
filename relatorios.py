@@ -19,6 +19,15 @@ class GeracaoRelatorios(tk.Frame):
 
         return data_formatada
     
+    def converter_datapadrao(self, data):
+        # Converte a string para um objeto datetime
+        data_hora_obj = datetime.strptime(data, '%d/%m/%Y')
+
+        # Formata o objeto datetime para o formato desejado
+        data_formatada = data_hora_obj.strftime('%Y-%m-%d')
+
+        return data_formatada
+    
     def data_atual(self):
         # Obtém a data e hora atuais
         data_hora_atual = datetime.now()
@@ -121,10 +130,12 @@ class GeracaoRelatorios(tk.Frame):
     def gerar_relatorio_vendas(self):
         self.text_relatorio.delete(1.0, tk.END)
 
-        datainicial_valida = self.validar_data(self.entry_datainicial.get())        
-        datafinal_valida = self.validar_data(self.entry_datafinal.get())
+        data_inicial = self.entry_datainicial.get()
+        data_final = self.entry_datafinal.get()
+        datainicial_valida = self.validar_data(data_inicial)        
+        datafinal_valida = self.validar_data(data_final)
 
-        if not self.entry_datainicial.get() or not self.entry_datafinal.get():
+        if not data_inicial or not data_final:
             messagebox.showerror("Erro", "Informe a data inicial e final.")
         elif not datainicial_valida:
             messagebox.showerror("Erro", "Data Inicial Inválida. Informe o formato válido dd/mm/aaaa.")
@@ -138,8 +149,9 @@ class GeracaoRelatorios(tk.Frame):
             SELECT vendas.id, produtos.nome, vendas.quantidade, vendas.total, vendas.data_venda, vendas.operacao
             FROM vendas 
             JOIN produtos ON vendas.produto_id = produtos.id
+            WHERE DATE(vendas.data_venda) BETWEEN ? AND ?
             ORDER BY vendas.data_venda
-            ''')
+            ''', (self.converter_datapadrao(data_inicial), self.converter_datapadrao(data_final)))
             vendas = cursor.fetchall()
             conexao.close()
 
