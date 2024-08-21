@@ -1,5 +1,7 @@
 import tkinter as tk
 import sqlite3
+from tkinter import messagebox
+import re
 from datetime import datetime
 
 class GeracaoRelatorios(tk.Frame):
@@ -25,6 +27,27 @@ class GeracaoRelatorios(tk.Frame):
         data_formatada = data_hora_atual.strftime('%d/%m/%Y às %H:%M')
 
         return data_formatada
+    
+    def validar_data(self, data):
+        
+        # Expressão regular para o formato dd/mm/aaaa
+        padrao = re.compile(r'^\d{2}/\d{2}/\d{4}$')
+
+        # Verifica se a data corresponde ao padrão
+        if not padrao.match(data):
+            # messagebox.showerror("Erro de Validação", "A data deve estar no formato dd/mm/aaaa.")
+            return False
+        
+        # Verificar se os valores de dia, mês e ano são válidos
+        try:
+            dia, mes, ano = map(int, data.split('/'))
+            if not (1 <= dia <= 31 and 1 <= mes <= 12 and ano > 0):
+                raise ValueError
+        except ValueError:
+            messagebox.showerror("Erro de Validação", "Data inválida.")
+            return False
+        
+        return True
 
     def create_widgets(self):
         self.label_titulo_relatorios = tk.Label(self, text="Relatórios")
@@ -41,6 +64,28 @@ class GeracaoRelatorios(tk.Frame):
 
         self.button_relatorio_compras = tk.Button(self.frame_botoes, text="Relatório de Compras", command=self.gerar_relatorio_compras)
         self.button_relatorio_compras.grid(row=0, column=2, padx=5, pady=5, sticky="ew")
+
+        self.label_periodo = tk.Label(self, text="Período para Consulta")
+        self.label_periodo.pack(pady=2)
+
+        self.frame_opcoes = tk.Frame(self)
+        self.frame_opcoes.pack(pady=5)
+
+        self.label_datainicial = tk.Label(self.frame_opcoes, text="Data Inicial:")
+        self.label_datainicial.grid(row=0, column=0, padx=5, pady=5, sticky="e")
+        self.entry_datainicial = tk.Entry(self.frame_opcoes, width=15)
+        self.entry_datainicial.grid(row=0, column=1, padx=(0, 10), pady=5, sticky="ew")
+
+        self.label_datafinal = tk.Label(self.frame_opcoes, text="Data Final:")
+        self.label_datafinal.grid(row=0, column=2, padx=5, pady=5, sticky="e")
+        self.entry_datafinal = tk.Entry(self.frame_opcoes, width=15)
+        self.entry_datafinal.grid(row=0, column=3, padx=(0, 10), pady=5, sticky="ew")
+
+        # Definir a data atual nos campos de entrada
+        data_atual = datetime.now().strftime("%d/%m/%Y")
+        self.entry_datainicial.insert(0, data_atual)
+        self.entry_datafinal.insert(0, data_atual)
+
 
         self.text_relatorio = tk.Text(self)
         self.text_relatorio.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
@@ -74,43 +119,55 @@ class GeracaoRelatorios(tk.Frame):
         self.text_relatorio.insert(tk.END, relatorio)
 
     def gerar_relatorio_vendas(self):
-        conexao = sqlite3.connect('estoque.db')
-        cursor = conexao.cursor()
-        cursor.execute('''
-        SELECT vendas.id, produtos.nome, vendas.quantidade, vendas.total, vendas.data_venda, vendas.operacao
-        FROM vendas 
-        JOIN produtos ON vendas.produto_id = produtos.id
-        ORDER BY vendas.data_venda
-        ''')
-        vendas = cursor.fetchall()
-        conexao.close()
-
-        relatorio = f"Relatório de Vendas - Gerado em {self.data_atual()}\n\n"
-        relatorio += f"{'Data':<12}{'Produto':<48}{'Qtd':>4}{'Total':>12}{'Operação':>9}\n"
-        relatorio += "-" * 85 + "\n"
-        total_venda = 0
-        total_estorno = 0
-        total = 0
-
-        for venda in vendas:
-            relatorio += f"{self.converter_data(venda[4]):<12}{venda[1]:<48}{venda[2]:>4}{venda[3]:>12.2f}{venda[5]:>9}\n"
-
-            if venda[5] == "Venda":
-                total_venda = total_venda + venda[3]
-            else:
-                total_estorno = total_estorno + venda[3]
-
-        total = total_venda + total_estorno
-
-        relatorio += "-" * 85 + "\n"
-        linha = "." * 62
-        relatorio += f"{'Vendas':<10}{linha:>62}{'R$':>3}{total_venda:>10.2f}\n"
-        relatorio += f"{'Estornos':<10}{linha:>62}{'R$':>3}{total_estorno:>10.2f}\n"
-        relatorio += f"{'Total':<10}{linha:>62}{'R$':>3}{total:>10.2f}\n"
-        # relatorio += "-" * 85 + "\n"
-
         self.text_relatorio.delete(1.0, tk.END)
-        self.text_relatorio.insert(tk.END, relatorio)
+
+        datainicial_valida = self.validar_data(self.entry_datainicial.get())        
+        datafinal_valida = self.validar_data(self.entry_datafinal.get())
+
+        if not self.entry_datainicial.get() or not self.entry_datafinal.get():
+            messagebox.showerror("Erro", "Informe a data inicial e final.")
+        elif not datainicial_valida:
+            messagebox.showerror("Erro", "Data Inicial Inválida. Informe o formato válido dd/mm/aaaa.")
+        elif not datafinal_valida:
+            messagebox.showerror("Erro", "Data Final Inválida. Informe o formato válido dd/mm/aaaa.")
+
+        if datainicial_valida and datafinal_valida:
+            conexao = sqlite3.connect('estoque.db')
+            cursor = conexao.cursor()
+            cursor.execute('''
+            SELECT vendas.id, produtos.nome, vendas.quantidade, vendas.total, vendas.data_venda, vendas.operacao
+            FROM vendas 
+            JOIN produtos ON vendas.produto_id = produtos.id
+            ORDER BY vendas.data_venda
+            ''')
+            vendas = cursor.fetchall()
+            conexao.close()
+
+            relatorio = f"Relatório de Vendas - Gerado em {self.data_atual()}\n\n"
+            relatorio += f"{'Data':<12}{'Produto':<48}{'Qtd':>4}{'Total':>12}{'Operação':>9}\n"
+            relatorio += "-" * 85 + "\n"
+            total_venda = 0
+            total_estorno = 0
+            total = 0
+
+            for venda in vendas:
+                relatorio += f"{self.converter_data(venda[4]):<12}{venda[1]:<48}{venda[2]:>4}{venda[3]:>12.2f}{venda[5]:>9}\n"
+
+                if venda[5] == "Venda":
+                    total_venda = total_venda + venda[3]
+                else:
+                    total_estorno = total_estorno + venda[3]
+
+            total = total_venda + total_estorno
+
+            relatorio += "-" * 85 + "\n"
+            linha = "." * 62
+            relatorio += f"{'Vendas':<10}{linha:>62}{'R$':>3}{total_venda:>10.2f}\n"
+            relatorio += f"{'Estornos':<10}{linha:>62}{'R$':>3}{total_estorno:>10.2f}\n"
+            relatorio += f"{'Total':<10}{linha:>62}{'R$':>3}{total:>10.2f}\n"
+            # relatorio += "-" * 85 + "\n"
+
+            self.text_relatorio.insert(tk.END, relatorio)
 
     def gerar_relatorio_compras(self):
         conexao = sqlite3.connect('estoque.db')
