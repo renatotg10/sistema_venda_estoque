@@ -74,7 +74,7 @@ class GeracaoRelatorios(tk.Frame):
         self.button_relatorio_compras = tk.Button(self.frame_botoes, text="Relatório de Compras", command=self.gerar_relatorio_compras)
         self.button_relatorio_compras.grid(row=0, column=2, padx=5, pady=5, sticky="ew")
 
-        self.label_periodo = tk.Label(self, text="Período para Consulta")
+        self.label_periodo = tk.Label(self, text="Informe o Período para Consulta das Compras e Vendas")
         self.label_periodo.pack(pady=2)
 
         self.frame_opcoes = tk.Frame(self)
@@ -156,6 +156,7 @@ class GeracaoRelatorios(tk.Frame):
             conexao.close()
 
             relatorio = f"Relatório de Vendas - Gerado em {self.data_atual()}\n\n"
+            relatorio += f"Período de {data_inicial} à {data_final}\n\n"
             relatorio += f"{'Data':<12}{'Produto':<48}{'Qtd':>4}{'Total':>12}{'Operação':>9}\n"
             relatorio += "-" * 85 + "\n"
             total_venda = 0
@@ -182,40 +183,56 @@ class GeracaoRelatorios(tk.Frame):
             self.text_relatorio.insert(tk.END, relatorio)
 
     def gerar_relatorio_compras(self):
-        conexao = sqlite3.connect('estoque.db')
-        cursor = conexao.cursor()
-        cursor.execute('''
-        SELECT compras.id, produtos.nome, compras.quantidade, compras.total, compras.data_compra, compras.operacao 
-        FROM compras 
-        JOIN produtos ON compras.produto_id = produtos.id
-        ORDER BY compras.data_compra
-        ''')
-        compras = cursor.fetchall()
-        conexao.close()
-
-        relatorio = f"Relatório de Compras - Gerado em {self.data_atual()}\n\n"
-        relatorio += f"{'Data':<12}{'Produto':<48}{'Qtd':>4}{'Total':>12}{'Operação':>9}\n"
-        relatorio += "-" * 85 + "\n"
-        total_compra = 0
-        total_estorno = 0
-        total = 0
-
-        for compra in compras:
-            relatorio += f"{self.converter_data(compra[4]):<12}{compra[1]:<48}{compra[2]:>4}{compra[3]:>12.2f}{compra[5]:>9}\n"
-
-            if compra[5] == "Compra":
-                total_compra = total_compra + compra[3]
-            else:
-                total_estorno = total_estorno + compra[3]
-
-        total = total_compra + total_estorno
-
-
-        relatorio += "-" * 85 + "\n"
-        linha = "." * 62
-        relatorio += f"{'Compras':<10}{linha:>62}{'R$':>3}{total_compra:>10.2f}\n"
-        relatorio += f"{'Estornos':<10}{linha:>62}{'R$':>3}{total_estorno:>10.2f}\n"
-        relatorio += f"{'Total':<10}{linha:>62}{'R$':>3}{total:>10.2f}\n"
-
         self.text_relatorio.delete(1.0, tk.END)
-        self.text_relatorio.insert(tk.END, relatorio)
+
+        data_inicial = self.entry_datainicial.get()
+        data_final = self.entry_datafinal.get()
+        datainicial_valida = self.validar_data(data_inicial)        
+        datafinal_valida = self.validar_data(data_final)
+
+        if not data_inicial or not data_final:
+            messagebox.showerror("Erro", "Informe a data inicial e final.")
+        elif not datainicial_valida:
+            messagebox.showerror("Erro", "Data Inicial Inválida. Informe o formato válido dd/mm/aaaa.")
+        elif not datafinal_valida:
+            messagebox.showerror("Erro", "Data Final Inválida. Informe o formato válido dd/mm/aaaa.")
+
+        if datainicial_valida and datafinal_valida:
+            conexao = sqlite3.connect('estoque.db')
+            cursor = conexao.cursor()
+            cursor.execute('''
+            SELECT compras.id, produtos.nome, compras.quantidade, compras.total, compras.data_compra, compras.operacao 
+            FROM compras 
+            JOIN produtos ON compras.produto_id = produtos.id
+            WHERE DATE(compras.data_compra) BETWEEN ? AND ?
+            ORDER BY compras.data_compra
+            ''', (self.converter_datapadrao(data_inicial), self.converter_datapadrao(data_final)))
+            compras = cursor.fetchall()
+            conexao.close()
+
+            relatorio = f"Relatório de Compras - Gerado em {self.data_atual()}\n\n"
+            relatorio += f"Período de {data_inicial} à {data_final}\n\n"
+            relatorio += f"{'Data':<12}{'Produto':<48}{'Qtd':>4}{'Total':>12}{'Operação':>9}\n"
+            relatorio += "-" * 85 + "\n"
+            total_compra = 0
+            total_estorno = 0
+            total = 0
+
+            for compra in compras:
+                relatorio += f"{self.converter_data(compra[4]):<12}{compra[1]:<48}{compra[2]:>4}{compra[3]:>12.2f}{compra[5]:>9}\n"
+
+                if compra[5] == "Compra":
+                    total_compra = total_compra + compra[3]
+                else:
+                    total_estorno = total_estorno + compra[3]
+
+            total = total_compra + total_estorno
+
+
+            relatorio += "-" * 85 + "\n"
+            linha = "." * 62
+            relatorio += f"{'Compras':<10}{linha:>62}{'R$':>3}{total_compra:>10.2f}\n"
+            relatorio += f"{'Estornos':<10}{linha:>62}{'R$':>3}{total_estorno:>10.2f}\n"
+            relatorio += f"{'Total':<10}{linha:>62}{'R$':>3}{total:>10.2f}\n"
+
+            self.text_relatorio.insert(tk.END, relatorio)
