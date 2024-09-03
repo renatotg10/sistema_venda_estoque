@@ -1,8 +1,10 @@
+from tkinter import messagebox
+from tkinter import filedialog
+from datetime import datetime
 import tkinter as tk
 import sqlite3
-from tkinter import messagebox
 import re
-from datetime import datetime
+
 
 class GeracaoRelatorios(tk.Frame):
     def __init__(self, master=None):
@@ -73,6 +75,9 @@ class GeracaoRelatorios(tk.Frame):
 
         self.button_relatorio_compras = tk.Button(self.frame_botoes, text="Relatório de Compras", command=self.gerar_relatorio_compras)
         self.button_relatorio_compras.grid(row=0, column=2, padx=5, pady=5, sticky="ew")
+
+        self.button_gerar_txt = tk.Button(self.frame_botoes, text="Salvar Relatório", command=self.salvar_relatorio)
+        self.button_gerar_txt.grid(row=0, column=3, padx=5, pady=5, sticky="ew")
 
         self.label_periodo = tk.Label(self, text="Informe o Período para Consulta das Compras e Vendas")
         self.label_periodo.pack(pady=2)
@@ -236,3 +241,22 @@ class GeracaoRelatorios(tk.Frame):
             relatorio += f"{'Total':<10}{linha:>62}{'R$':>3}{total:>10.2f}\n"
 
             self.text_relatorio.insert(tk.END, relatorio)
+
+    def salvar_relatorio(self):
+        # Gerando um nome padrão de arquivo com base na data e hora atuais
+        nome_padrao = f"relatorio_estoque_{datetime.now().strftime('%Y%m%d_%H%M%S')}.txt"
+        
+        # Abrir a janela de diálogo "Salvar como" com o nome padrão preenchido
+        nome_arquivo = filedialog.asksaveasfilename(
+            defaultextension=".txt", 
+            filetypes=[("Text files", "*.txt"), ("All files", "*.*")],
+            initialfile=nome_padrao  # Nome do arquivo padrão
+        )
+
+        # Verifica se um nome de arquivo foi selecionado
+        if nome_arquivo:
+            # Salvando o conteúdo do relatório no arquivo escolhido pelo usuário
+            with open(nome_arquivo, 'w', encoding='utf-8') as file:
+                file.write(self.text_relatorio.get(1.0, tk.END))
+
+            print(f"Relatório salvo como: {nome_arquivo}")
