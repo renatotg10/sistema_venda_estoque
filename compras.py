@@ -1,7 +1,8 @@
-import tkinter as tk
-from tkinter import messagebox, ttk
-import sqlite3
 from datetime import datetime
+from tkinter import messagebox, ttk
+import tkinter as tk
+import sqlite3
+import re
 
 class RegistroCompras(tk.Frame):
     ajuste_quantidade = 0
@@ -20,6 +21,43 @@ class RegistroCompras(tk.Frame):
         data_formatada = data_hora_obj.strftime('%d/%m/%Y')
 
         return data_formatada
+    
+    def converter_data(self, data_hora_str):
+        # Converte a string para um objeto datetime
+        data_hora_obj = datetime.strptime(data_hora_str, '%Y-%m-%d %H:%M:%S')
+        # Formata o objeto datetime para o formato desejado
+        data_formatada = data_hora_obj.strftime('%d/%m/%Y')
+        return data_formatada
+    
+    def converter_datapadrao(self, data):
+        # Converte a string para um objeto datetime
+        data_hora_obj = datetime.strptime(data, '%d/%m/%Y')
+
+        # Formata o objeto datetime para o formato desejado
+        data_formatada = data_hora_obj.strftime('%Y-%m-%d %H:%M:%S')
+
+        return data_formatada
+    
+    def validar_data(self, data):
+        
+        # Expressão regular para o formato dd/mm/aaaa
+        padrao = re.compile(r'^\d{2}/\d{2}/\d{4}$')
+
+        # Verifica se a data corresponde ao padrão
+        if not padrao.match(data):
+            # messagebox.showerror("Erro de Validação", "A data deve estar no formato dd/mm/aaaa.")
+            return False
+        
+        # Verificar se os valores de dia, mês e ano são válidos
+        try:
+            dia, mes, ano = map(int, data.split('/'))
+            if not (1 <= dia <= 31 and 1 <= mes <= 12 and ano > 0):
+                raise ValueError
+        except ValueError:
+            messagebox.showerror("Erro de Validação", "Data inválida.")
+            return False
+        
+        return True
 
     def create_widgets(self):
         self.label_titulo_compras = tk.Label(self, text="Registro de Compras")
@@ -48,10 +86,19 @@ class RegistroCompras(tk.Frame):
         self.combo_operacao = ttk.Combobox(self.frame_compra, values=["Compra", "Estorno"], state='readonly')
         self.combo_operacao.grid(row=3, column=1, padx=(0, 10), pady=5, sticky="ew")
 
+        self.label_datacompra = tk.Label(self.frame_compra, text="Data Compra:")
+        self.label_datacompra.grid(row=4, column=0, padx=5, pady=5, sticky="e")
+        self.entry_datacompra = tk.Entry(self.frame_compra, width=50)
+        self.entry_datacompra.grid(row=4, column=1, padx=(0, 10), pady=5, sticky="ew")
+
+        # Definir a data atual nos campos de entrada
+        # data_atual = datetime.now().strftime("%d/%m/%Y")
+        # self.entry_datacompra.insert(0, data_atual)
+
         self.label_observacao = tk.Label(self.frame_compra, text="Observação:")
-        self.label_observacao.grid(row=4, column=0, padx=5, pady=5, sticky="e")
+        self.label_observacao.grid(row=5, column=0, padx=5, pady=5, sticky="e")
         self.entry_observacao = tk.Entry(self.frame_compra, width=50)
-        self.entry_observacao.grid(row=4, column=1, padx=(0, 10), pady=5, sticky="ew")
+        self.entry_observacao.grid(row=5, column=1, padx=(0, 10), pady=5, sticky="ew")
 
         # Criar o frame para os botões
         self.frame_botoes = tk.Frame(self)
@@ -126,6 +173,17 @@ class RegistroCompras(tk.Frame):
         preco = total / quantidade
         produto_nome = produto_selecionado
         observacao = self.entry_observacao.get()
+        datacompra = self.entry_datacompra.get()
+
+        datacompra_valida = self.validar_data(datacompra)
+
+        if not datacompra:
+            messagebox.showerror("Erro", "Informe a data da compra.")
+            return
+        
+        elif not datacompra_valida:
+            messagebox.showerror("Erro", "Data da compra inválida. Informe o formato válido dd/mm/aaaa.")
+            return
 
         conexao = sqlite3.connect('estoque.db')
         cursor = conexao.cursor()
@@ -148,16 +206,16 @@ class RegistroCompras(tk.Frame):
             # Atualiza a compra existente
             cursor.execute('''
                 UPDATE compras
-                SET produto_id = ?, operacao = ?, quantidade = ?, preco = ?, total = ?, observacao = ?
+                SET produto_id = ?, operacao = ?, quantidade = ?, preco = ?, total = ?, observacao = ?, data_compra = ?
                 WHERE id = ?
-            ''', (produto_id, operacao, quantidade, preco, total, observacao, self.id_compra_editando))
+            ''', (produto_id, operacao, quantidade, preco, total, observacao, self.converter_datapadrao(datacompra), self.id_compra_editando))
             mensagem = "Compra atualizada com sucesso!"
             self.id_compra_editando = None  # Resetar a variável de controle
             quantidade = quantidade - int(ajuste_quantidade)
         else:
             # Inserir uma nova compra
-            cursor.execute('INSERT INTO compras (produto_id, operacao, quantidade, preco, total, observacao) VALUES (?, ?, ?, ?, ?, ?)', 
-                        (produto_id, operacao, quantidade, preco, total, observacao))
+            cursor.execute('INSERT INTO compras (produto_id, operacao, quantidade, preco, total, observacao, data_compra) VALUES (?, ?, ?, ?, ?, ?, ?)', 
+                        (produto_id, operacao, quantidade, preco, total, observacao, self.converter_datapadrao(datacompra)))
             mensagem = "Compra registrada com sucesso!"
 
         # Atualizar a quantidade no estoque
@@ -207,6 +265,11 @@ class RegistroCompras(tk.Frame):
     def atualizar_combo_produto(self):
         self.carregar_produtos_compra()
         self.limpa_campos()
+        
+        # Definir a data atual nos campos de entrada
+        data_atual = datetime.now().strftime("%d/%m/%Y")
+        self.entry_datacompra.delete(0, tk.END)
+        self.entry_datacompra.insert(0, data_atual)
 
     def limpa_campos(self):
         self.entry_quantidade_compra.delete(0, tk.END)
@@ -255,7 +318,7 @@ class RegistroCompras(tk.Frame):
             self.entry_total_compra.insert(0, float(compra[4]) * -1)
         else:
             self.entry_total_compra.insert(0, compra[4])
-            
+
         self.combo_operacao.set(compra[6])
         self.entry_observacao.delete(0, tk.END)
         self.entry_observacao.insert(0, compra[7])

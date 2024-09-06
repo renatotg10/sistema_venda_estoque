@@ -137,15 +137,20 @@ class GeracaoRelatorios(tk.Frame):
 
         data_inicial = self.entry_datainicial.get()
         data_final = self.entry_datafinal.get()
-        datainicial_valida = self.validar_data(data_inicial)        
+        datainicial_valida = self.validar_data(data_inicial)
         datafinal_valida = self.validar_data(data_final)
 
         if not data_inicial or not data_final:
             messagebox.showerror("Erro", "Informe a data inicial e final.")
+            return
+        
         elif not datainicial_valida:
             messagebox.showerror("Erro", "Data Inicial Inválida. Informe o formato válido dd/mm/aaaa.")
+            return
+        
         elif not datafinal_valida:
             messagebox.showerror("Erro", "Data Final Inválida. Informe o formato válido dd/mm/aaaa.")
+            return
 
         if datainicial_valida and datafinal_valida:
             conexao = sqlite3.connect('estoque.db')
@@ -197,10 +202,15 @@ class GeracaoRelatorios(tk.Frame):
 
         if not data_inicial or not data_final:
             messagebox.showerror("Erro", "Informe a data inicial e final.")
+            return
+        
         elif not datainicial_valida:
             messagebox.showerror("Erro", "Data Inicial Inválida. Informe o formato válido dd/mm/aaaa.")
+            return
+        
         elif not datafinal_valida:
             messagebox.showerror("Erro", "Data Final Inválida. Informe o formato válido dd/mm/aaaa.")
+            return
 
         if datainicial_valida and datafinal_valida:
             conexao = sqlite3.connect('estoque.db')
