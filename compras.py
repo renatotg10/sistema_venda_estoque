@@ -37,6 +37,15 @@ class RegistroCompras(tk.Frame):
         data_formatada = data_hora_obj.strftime('%Y-%m-%d %H:%M:%S')
 
         return data_formatada
+
+    def converter_data_en(self, data):
+        # Converte a string para um objeto datetime
+        data_hora_obj = datetime.strptime(data, '%d/%m/%Y')
+
+        # Formata o objeto datetime para o formato desejado
+        data_formatada = data_hora_obj.strftime('%Y-%m-%d')
+
+        return data_formatada
     
     def validar_data(self, data):
         
@@ -111,6 +120,10 @@ class RegistroCompras(tk.Frame):
         # Botão Editar Compra
         self.button_editar = tk.Button(self.frame_botoes, text="Editar Compra", command=self.editar_compra)
         self.button_editar.grid(row=0, column=1, padx=5, pady=5, sticky="ew")
+
+        # Botão Filtrar
+        self.button_filtrar = tk.Button(self.frame_botoes, text="Filtrar", command=self.filtrar_compras)
+        self.button_filtrar.grid(row=0, column=2, padx=5, pady=5, sticky="ew")
 
         # Configurar a coluna 1 do frame_produto para se redimensionar ao redor dos botões
         self.frame_compra.grid_columnconfigure(1, weight=1)
@@ -247,6 +260,36 @@ class RegistroCompras(tk.Frame):
         JOIN produtos ON compras.produto_id = produtos.id
         WHERE DATE(compras.data_compra) = ?
         ''', (data_atual,))
+        compras = cursor.fetchall()
+        conexao.close()
+
+        for compra in compras:
+            compra_id = compra[0]
+            produto_nome = compra[1]
+            quantidade = compra[2]
+            preco = compra[3]
+            total = compra[4]
+            data_compra = self.converter_data(compra[5])
+            operacao = compra[6]
+            observacao = compra[7] if compra[7] else ""
+
+            self.tree_compras.insert("", "end", values=(compra_id, produto_nome, quantidade, preco, total, data_compra, operacao, observacao))
+
+    def filtrar_compras(self):
+        for i in self.tree_compras.get_children():
+            self.tree_compras.delete(i)
+
+        # Data atual no formato YYYY-MM-DD
+        data = self.converter_data_en(self.entry_datacompra.get()) + '%'
+
+        conexao = sqlite3.connect('estoque.db')
+        cursor = conexao.cursor()
+        cursor.execute('''
+        SELECT compras.id, produtos.nome, compras.quantidade, compras.preco, compras.total, compras.data_compra, compras.operacao, compras.observacao
+        FROM compras 
+        JOIN produtos ON compras.produto_id = produtos.id
+        WHERE DATE(compras.data_compra) like ?
+        ''', (data,))
         compras = cursor.fetchall()
         conexao.close()
 
