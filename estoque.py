@@ -1,6 +1,7 @@
 import tkinter as tk
-from tkinter import messagebox, ttk
 import sqlite3
+from tkinter import messagebox, ttk
+from utilitarios import *
 
 class GerenciamentoEstoque(tk.Frame):
     def __init__(self, master=None):
@@ -52,17 +53,17 @@ class GerenciamentoEstoque(tk.Frame):
         # Configurar a coluna 1 do frame_produto para se redimensionar ao redor dos botões
         self.frame_produto.grid_columnconfigure(1, weight=1)
 
-        self.tree_produtos = ttk.Treeview(self, columns=("ID", "Nome", "Preço", "Quantidade", "Status"), show="headings")
+        self.tree_produtos = ttk.Treeview(self, columns=("ID", "Nome", "Preco", "Quantidade", "Status"), show="headings")
         self.tree_produtos.heading("ID", text="ID")
         self.tree_produtos.heading("Nome", text="Nome")
-        self.tree_produtos.heading("Preço", text="Preço")
+        self.tree_produtos.heading("Preco", text="Preço")
         self.tree_produtos.heading("Quantidade", text="Quantidade")
         self.tree_produtos.heading("Status", text="Status")
         self.tree_produtos.pack(pady=10, fill=tk.BOTH, expand=True)
 
         self.tree_produtos.column("ID", width=50, anchor="center")
         self.tree_produtos.column("Nome", width=150, anchor="w")
-        self.tree_produtos.column("Preço", width=100, anchor="e")
+        self.tree_produtos.column("Preco", width=100, anchor="e")
         self.tree_produtos.column("Quantidade", width=100, anchor="center")
         self.tree_produtos.column("Status", width=100, anchor="center")
 
@@ -96,7 +97,7 @@ class GerenciamentoEstoque(tk.Frame):
             return
     
         nome = self.entry_nome.get()
-        preco = float(self.entry_preco.get())
+        preco = br_to_float(self.entry_preco.get())
         quantidade = int(self.entry_quantidade.get())
         # quantidade = 0
         status = 1 if self.combobox_status.get() == "Ativo" else 0
@@ -177,4 +178,4 @@ class GerenciamentoEstoque(tk.Frame):
 
         for produto in produtos:
             status = "Ativo" if produto[4] == 1 else "Inativo"
-            self.tree_produtos.insert("", "end", values=(produto[0], produto[1], produto[2], produto[3], status))
+            self.tree_produtos.insert("", "end", values=(produto[0], produto[1], float_to_br(produto[2]), produto[3], status))
