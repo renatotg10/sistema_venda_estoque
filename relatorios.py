@@ -100,7 +100,6 @@ class GeracaoRelatorios(tk.Frame):
         self.entry_datainicial.insert(0, data_atual)
         self.entry_datafinal.insert(0, data_atual)
 
-
         self.text_relatorio = tk.Text(self)
         self.text_relatorio.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
 

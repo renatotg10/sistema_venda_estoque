@@ -27,6 +27,15 @@ class RegistroVendas(tk.Frame):
         data_formatada = data_hora_obj.strftime('%Y-%m-%d %H:%M:%S')
 
         return data_formatada
+
+    def converter_data_en(self, data):
+        # Converte a string para um objeto datetime
+        data_hora_obj = datetime.strptime(data, '%d/%m/%Y')
+
+        # Formata o objeto datetime para o formato desejado
+        data_formatada = data_hora_obj.strftime('%Y-%m-%d')
+
+        return data_formatada
     
     def validar_data(self, data):
         
@@ -102,6 +111,10 @@ class RegistroVendas(tk.Frame):
         # Botão Editar Venda
         self.button_editar = tk.Button(self.frame_botoes, text="Editar Venda", command=self.editar_venda)
         self.button_editar.grid(row=0, column=1, padx=5, pady=5, sticky="ew")
+
+        # Botão Filtrar
+        self.button_filtrar = tk.Button(self.frame_botoes, text="Filtrar", command=self.filtrar_vendas)
+        self.button_filtrar.grid(row=0, column=2, padx=5, pady=5, sticky="ew")
 
         # Configurar a coluna 1 do frame_produto para se redimensionar ao redor dos botões
         self.frame_venda.grid_columnconfigure(1, weight=1)
@@ -243,6 +256,36 @@ class RegistroVendas(tk.Frame):
         JOIN produtos ON vendas.produto_id = produtos.id
         WHERE DATE(vendas.data_venda) = ?
         ''', (data_atual,))
+        vendas = cursor.fetchall()
+        conexao.close()
+
+        for venda in vendas:
+            venda_id = venda[0]
+            produto_nome = venda[1]
+            quantidade = venda[2]
+            preco = venda[3]
+            total = venda[4]
+            data_venda = self.converter_data(venda[5])
+            operacao = venda[6]
+            observacao = venda[7] if venda[7] else ""
+
+            self.tree_vendas.insert("", "end", values=(venda_id, produto_nome, quantidade, preco, total, data_venda, operacao, observacao))
+
+    def filtrar_vendas(self):
+        for i in self.tree_vendas.get_children():
+            self.tree_vendas.delete(i)
+
+        # Data atual no formato YYYY-MM-DD
+        data = self.converter_data_en(self.entry_datavenda.get()) + '%'
+
+        conexao = sqlite3.connect('estoque.db')
+        cursor = conexao.cursor()
+        cursor.execute('''
+        SELECT vendas.id, produtos.nome, vendas.quantidade, vendas.preco, vendas.total, vendas.data_venda, vendas.operacao, vendas.observacao
+        FROM vendas 
+        JOIN produtos ON vendas.produto_id = produtos.id
+        WHERE DATE(vendas.data_venda) like ?
+        ''', (data,))
         vendas = cursor.fetchall()
         conexao.close()
 
